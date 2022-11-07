@@ -38,7 +38,7 @@ func getBearerToken() (brr bearer, e error) {
 
 	res, err := http.Post(url, "application/json", bytes.NewBuffer(rb))
 	if err != nil {
-		panic(err)
+		e = err
 	}
 	defer res.Body.Close()
 
@@ -52,7 +52,7 @@ func getBearerToken() (brr bearer, e error) {
 
 		authErr := json.Unmarshal(body, &b)
 		if authErr != nil {
-			panic(authErr)
+			e = authErr
 		}
 		brr = b
 	}
