@@ -7,6 +7,8 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+
+	"chiller/model"
 )
 
 var (
@@ -62,57 +64,11 @@ func getBearerToken() (brr bearer, e error) {
 	return brr, e
 }
 
-type User struct {
-	Id             int64           `json:"id"`
-	Username       string          `json:"username"`
-	Password       string          `json:"password"`
-	Firstname      string          `json:"firstname"`
-	Lastname       string          `json:"lastname"`
-	DateCreated    []int           `json:"dateCreated"`
-	Enabled        bool            `json:"enabled"`
-	AccountExpired bool            `json:"accountExpired"`
-	AccountLocked  bool            `json:"accountLocked"`
-	Birthday       []int           `json:"birthday"`
-	UserRoles      []UserRoles     `json:"userRoles"`
-	UserAddresses  []UserAddresses `json:"userAddresses"`
-	UserPhones     []UserPhones    `json:"userPhones"`
-}
-
-type UserRoles struct {
-	Id   int64 `json:"id"`
-	Role struct {
-		Id          int64  `json:"id"`
-		Role        string `json:"role"`
-		Title       string `json:"title"`
-		Description string `json:"description"`
-	}
-}
-
-type UserAddresses struct {
-	Id      int64 `json:"id"`
-	Address struct {
-		Id      int64  `json:"id"`
-		Address string `json:"address"`
-		City    string `json:"city"`
-		State   string `json:"state"`
-		Zip     string `json:"zip"`
-	}
-}
-
-type UserPhones struct {
-	Id    int64 `json:"id"`
-	Phone struct {
-		Id    int64  `json:"id"`
-		Phone string `json:"phone"`
-		Type  string `json:"type"`
-	}
-}
-
-func GetAuthServiceData() (u []User, e error) {
+func GetAuthServiceData() (u []model.User, e error) {
 
 	auth, err := getBearerToken()
 	if err != nil {
-		panic(err)
+		e = err
 	}
 	bearer := fmt.Sprintf("Bearer %s", auth.Access_token)
 
@@ -134,7 +90,7 @@ func GetAuthServiceData() (u []User, e error) {
 		e = err
 	}
 
-	var users []User
+	var users []model.User
 	_ = json.Unmarshal(body, &users)
 
 	return users, e
