@@ -2,13 +2,12 @@ package http_client
 
 import (
 	"bytes"
+	"chiller/dao"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
-
-	"github.com/tdeslauriers/chiller/dao"
 )
 
 var (
