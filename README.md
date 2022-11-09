@@ -12,9 +12,16 @@ Because the site is hosted on broken computers, and more importantly, because I 
 
 1. Logs into site. 
 1. Uses read access to micro-services to pull db table data.
+    1. It would be easier to call the tables one at a time, but I am doing giant nested json for two reasons:
+        1. Learning exercise for navigating json w/ Go.
+        1. Ultimately, I will move to asyncronus pub/sub, and thats how the data will be. 
 1. Loads and encrypts data into back up database outside K8s cluster.
     * field level encryption.
 
 ## Day Two
 
 1.  Build function to populate data back to active site in the event of cluster failure.  
+
+## Day Three
+
+1. Implement pub/sub pattern vs blocking.

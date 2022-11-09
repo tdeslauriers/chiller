@@ -41,4 +41,26 @@ func TestGetBearerToken(t *testing.T) {
 
 	bearer, _ := getBearerToken()
 	t.Log(bearer.Access_token)
+	t.Log(bearer.Roles)
+}
+
+func TestGetAuthServiceData(t *testing.T) {
+
+	// Testing against known data set
+	users, _ := GetAuthServiceData()
+	if users[0].Lastname != "Skywalker" {
+		t.Fail()
+		t.Logf("Expected %s; Actual: %s", "Skywalker", users[0].Lastname)
+	}
+
+	if users[0].UserRoles[0].Role.Title != "General Admission" {
+		t.Fail()
+		t.Logf("Expected %s; Actual: %s", "GeneralAdmission", users[0].UserRoles[0].Role.Title)
+	}
+
+	if users[0].UserAddresses[0].Address.City != "Hoth" {
+		t.Fail()
+		t.Logf("Expected %s; Actual: %s", "Hoth", users[0].UserAddresses[0].Address.City)
+	}
+
 }
