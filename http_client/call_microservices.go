@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"os"
 
-	"chiller/model"
+	"github.com/tdeslauriers/chiller"
 )
 
 var (
@@ -64,7 +64,7 @@ func getBearerToken() (brr bearer, e error) {
 	return brr, e
 }
 
-func GetAuthServiceData() (u []model.User, e error) {
+func GetAuthServiceData() (u []chiller.User, e error) {
 
 	auth, err := getBearerToken()
 	if err != nil {
@@ -90,7 +90,7 @@ func GetAuthServiceData() (u []model.User, e error) {
 		e = err
 	}
 
-	var users []model.User
+	var users []chiller.User
 	_ = json.Unmarshal(body, &users)
 
 	return users, e
