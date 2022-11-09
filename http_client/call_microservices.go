@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/tdeslauriers/chiller"
+	"github.com/tdeslauriers/chiller/dao"
 )
 
 var (
@@ -64,7 +64,7 @@ func getBearerToken() (brr bearer, e error) {
 	return brr, e
 }
 
-func GetAuthServiceData() (u []chiller.User, e error) {
+func GetAuthServiceData() (u []dao.User, e error) {
 
 	auth, err := getBearerToken()
 	if err != nil {
@@ -90,7 +90,7 @@ func GetAuthServiceData() (u []chiller.User, e error) {
 		e = err
 	}
 
-	var users []chiller.User
+	var users []dao.User
 	_ = json.Unmarshal(body, &users)
 
 	return users, e
