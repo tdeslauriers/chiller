@@ -1,5 +1,8 @@
 package dao
 
+// nested structs have been pulled appart for re-use
+
+// auth persistance objects
 type User struct {
 	Id             int64           `json:"id"`
 	Username       string          `json:"username"`
@@ -51,3 +54,5 @@ type Phone struct {
 	Phone string `json:"phone"`
 	Type  string `json:"type"`
 }
+
+// gallery persistence objects
