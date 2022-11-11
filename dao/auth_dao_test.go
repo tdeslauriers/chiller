@@ -7,16 +7,16 @@ import (
 )
 
 var u User = User{
-	Id:             43,
+	Id:             44,
 	Username:       "tom@tom.com",
 	Password:       "123456789",
 	Firstname:      "Tom",
 	Lastname:       "Atomic",
-	DateCreated:    []int{2000, 5, 5},
-	Enabled:        true,
+	DateCreated:    "2007-02-02",
+	Enabled:        false,
 	AccountExpired: false,
 	AccountLocked:  false,
-	Birthday:       []int{1971, 8, 8},
+	Birthday:       "1969-12-08",
 }
 
 func TestInsertUser(t *testing.T) {
@@ -33,6 +33,9 @@ func TestFindAllUsers(t *testing.T) {
 
 	users, _ := findAllUsers()
 
+	for _, v := range users {
+		t.Logf("dob: %v", v)
+	}
 	if len(users) < 1 {
 		t.Log("No users returned.")
 		t.Fail()

@@ -9,11 +9,11 @@ type User struct {
 	Password       string          `json:"password"`
 	Firstname      string          `json:"firstname"`
 	Lastname       string          `json:"lastname"`
-	DateCreated    []int           `json:"dateCreated"`
+	DateCreated    string          `json:"dateCreated"`
 	Enabled        bool            `json:"enabled"`
 	AccountExpired bool            `json:"accountExpired"`
 	AccountLocked  bool            `json:"accountLocked"`
-	Birthday       []int           `json:"birthday"`
+	Birthday       string          `json:"birthday"`
 	UserRoles      []UserRoles     `json:"userRoles"`
 	UserAddresses  []UserAddresses `json:"userAddresses"`
 	UserPhones     []UserPhones    `json:"userPhones"`

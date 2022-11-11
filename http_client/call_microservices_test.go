@@ -48,6 +48,10 @@ func TestGetAuthServiceData(t *testing.T) {
 
 	// Testing against known data set
 	users, _ := GetAuthServiceData()
+	for _, v := range users {
+		t.Log(v)
+	}
+
 	if users[0].Lastname != "Skywalker" {
 		t.Fail()
 		t.Logf("Expected %s; Actual: %s", "Skywalker", users[0].Lastname)
