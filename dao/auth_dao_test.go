@@ -7,7 +7,7 @@ import (
 )
 
 var u User = User{
-	Id:             42,
+	Id:             43,
 	Username:       "tom@tom.com",
 	Password:       "123456789",
 	Firstname:      "Tom",
@@ -27,4 +27,14 @@ func TestInsertUser(t *testing.T) {
 func TestUpdateUser(t *testing.T) {
 
 	t.Log(updateUser(u))
+}
+
+func TestFindAllUsers(t *testing.T) {
+
+	users, _ := findAllUsers()
+
+	if len(users) < 1 {
+		t.Log("No users returned.")
+		t.Fail()
+	}
 }

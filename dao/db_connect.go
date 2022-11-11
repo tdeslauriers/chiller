@@ -15,7 +15,7 @@ var (
 )
 
 // DBConn is db connector function
-func DBConn(name string) *sql.DB {
+func dbConn(name string) *sql.DB {
 	var url = fmt.Sprintf("%s:%s@tcp(%s)/%s?parseTime=true", user, pass, dbIP, name)
 	db, err := sql.Open("mysql", url)
 	if err != nil {
