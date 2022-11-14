@@ -16,22 +16,22 @@ var u User = User{
 	Enabled:        false,
 	AccountExpired: false,
 	AccountLocked:  false,
-	Birthday:       "1969-12-08",
+	Birthday:       "",
 }
 
 func TestInsertUser(t *testing.T) {
 
-	t.Log(insertUser(u))
+	t.Log(InsertUser(u))
 }
 
 func TestUpdateUser(t *testing.T) {
 
-	t.Log(updateUser(u))
+	t.Log(UpdateUser(u))
 }
 
 func TestFindAllUsers(t *testing.T) {
 
-	users, _ := findAllUsers()
+	users, _ := FindAllUsers()
 
 	for _, v := range users {
 		t.Logf("dob: %v", v)
