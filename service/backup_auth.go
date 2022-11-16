@@ -32,9 +32,15 @@ func BackupAuthService() {
 	for _, v := range auth {
 
 		go func(u dao.User) {
-
 			defer wg.Done()
-			if userInBackup(u.Id, bkUsers) {
+
+			inBackup := false
+			for _, v := range bkUsers {
+				if v.Id == u.Id {
+					inBackup = true
+				}
+			}
+			if inBackup {
 				err = dao.UpdateUser(u)
 			} else {
 				err = dao.InsertUser(u)
@@ -47,18 +53,6 @@ func BackupAuthService() {
 
 }
 
-func userInBackup(id int64, dbUsers []dao.User) bool {
-
-	exists := false
-	for _, v := range dbUsers {
-		if v.Id == id {
-			exists = true
-		}
-	}
-	return exists
-
-}
-
 // Roles: different process because only real many-to-many
 // need to do update on role table first
 func reconcileRoles(users []dao.User) error {
@@ -66,7 +60,14 @@ func reconcileRoles(users []dao.User) error {
 	roles := make([]dao.Role, 0)
 	for _, v := range users {
 		for _, ur := range v.UserRoles {
-			if len(roles) == 0 || !isConsolidated(ur.Role.Id, roles) {
+
+			isConsolidated := false
+			for _, v := range roles {
+				if v.Id == ur.Id {
+					isConsolidated = true
+				}
+			}
+			if len(roles) == 0 || !isConsolidated {
 				roles = append(roles, ur.Role)
 			}
 		}
@@ -84,7 +85,13 @@ func reconcileRoles(users []dao.User) error {
 		go func(r dao.Role) {
 			defer wg.Done()
 
-			if rolePresent(r.Id, dbRoles) && len(dbRoles) != 0 {
+			exists := false
+			for _, v := range dbRoles {
+				if v.Id == r.Id {
+					exists = true
+				}
+			}
+			if exists && len(dbRoles) != 0 {
 				err = dao.UpdateRole(r)
 			} else {
 				err = dao.InsertRole(r)
@@ -98,7 +105,13 @@ func reconcileRoles(users []dao.User) error {
 		go func(r dao.Role) {
 			defer wg.Done()
 
-			if !rolePresent(r.Id, roles) && len(roles) != 0 {
+			exists := false
+			for _, v := range roles {
+				if v.Id == r.Id {
+					exists = true
+				}
+			}
+			if !exists && len(roles) != 0 {
 				err = dao.DeleteRole(r)
 			}
 		}(v)
@@ -107,26 +120,6 @@ func reconcileRoles(users []dao.User) error {
 	wg.Wait()
 
 	return err
-}
-
-func isConsolidated(id int64, rs []dao.Role) bool {
-	exists := false
-	for _, v := range rs {
-		if v.Id == id {
-			exists = true
-		}
-	}
-	return exists
-}
-
-func rolePresent(id int64, dbRoles []dao.Role) bool {
-	exists := false
-	for _, v := range dbRoles {
-		if v.Id == id {
-			exists = true
-		}
-	}
-	return exists
 }
 
 func reconcileUserRoles(user dao.User) (err error) {
@@ -142,7 +135,14 @@ func reconcileUserRoles(user dao.User) (err error) {
 
 		go func(ur dao.UserRoles) {
 			defer wg.Done()
-			if !urInBackup(ur.Id, bkur) || len(bkur) == 0 {
+
+			exists := false // in back up data.
+			for _, v := range bkur {
+				if ur.Id == v.Id {
+					exists = true
+				}
+			}
+			if !exists || len(bkur) == 0 {
 				err = dao.InsertUserRole(user.Id, ur)
 			}
 		}(v)
@@ -152,7 +152,15 @@ func reconcileUserRoles(user dao.User) (err error) {
 
 		go func(ur dao.UrXref) {
 			defer wg.Done()
-			if !urPresent(ur.Id, user.UserRoles) {
+
+			exists := false // in the auth-service json data
+			for _, v := range user.UserRoles {
+				if ur.Id == v.Id {
+					exists = true
+				}
+			}
+
+			if !exists {
 				err = dao.DeleteUserRole(ur.Id)
 			}
 		}(v)
@@ -161,24 +169,4 @@ func reconcileUserRoles(user dao.User) (err error) {
 	wg.Wait()
 
 	return err
-}
-
-func urInBackup(id int64, ur []dao.UrXref) bool {
-	exists := false
-	for _, v := range ur {
-		if v.Id == id {
-			exists = true
-		}
-	}
-	return exists
-}
-
-func urPresent(id int64, ur []dao.UserRoles) bool {
-	exists := false
-	for _, v := range ur {
-		if v.Id == id {
-			exists = true
-		}
-	}
-	return exists
 }
