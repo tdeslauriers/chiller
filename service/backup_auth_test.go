@@ -1,6 +1,7 @@
 package service
 
 import (
+	"chiller/http_client"
 	"fmt"
 	"sync"
 	"testing"
@@ -11,6 +12,17 @@ import (
 func TestBackupAuthService(t *testing.T) {
 
 	BackupAuthService()
+}
+
+func TestReconileRoles(t *testing.T) {
+
+	auth, err := http_client.GetAuthServiceData()
+	if err != nil {
+		panic(err)
+	}
+	
+
+	reconcileRoles(auth)
 }
 
 func TestGoPractice(t *testing.T) {

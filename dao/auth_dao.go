@@ -151,7 +151,7 @@ func DeleteUser(user User) (count int64, e error) {
 		return 0, err
 	}
 
-	log.Printf("Deletion of user record %d successful, %d row(s) effected", user.Id, count)
+	log.Printf("Deletion of user record %d successful, %d row(s) affected", user.Id, count)
 	return count, err
 }
 
@@ -209,8 +209,9 @@ func UpdateRole(role Role) (err error) {
 	}
 
 	db.Close()
-
-	log.Printf("Updated role record %d in the backup auth database. %d rows effected. ", role.Id, count)
+	if count > 0 {
+		log.Printf("Updated role record %d in the backup auth database. %d rows affected. ", role.Id, count)
+	}
 	return err
 }
 
@@ -219,7 +220,7 @@ func FindAllRoles() (roles []Role, e error) {
 	db := dbConn(AUTH_BACKUP_DB)
 	defer db.Close()
 
-	query := "SELECT id, role, title, descripiton FROM role"
+	query := "SELECT id, role, title, description FROM role"
 	rs, err := db.Query(query)
 	if err != nil {
 		return nil, err
@@ -239,7 +240,7 @@ func FindAllRoles() (roles []Role, e error) {
 	return roles, e
 }
 
-func DeleteRole(role Role) (count int64, e error) {
+func DeleteRole(role Role) (e error) {
 
 	db := dbConn(AUTH_BACKUP_DB)
 	defer db.Close()
@@ -247,21 +248,23 @@ func DeleteRole(role Role) (count int64, e error) {
 	query := "DELETE FROM role WHERE id = ?"
 	stmt, err := db.Prepare(query)
 	if err != nil {
-		return 0, err
+		return err
 	}
 
 	r, err := stmt.Exec(role.Id)
 	if err != nil {
-		return 0, err
+		return err
 	}
 
-	count, err = r.RowsAffected()
+	count, err := r.RowsAffected()
 	if err != nil {
-		return 0, err
+		return err
 	}
 
-	log.Printf("Deletion of role record %d successful, %d row(s) effected", role.Id, count)
-	return count, err
+	if count > 0 {
+		log.Printf("Deletion of role record %d successful, %d row(s) affected", role.Id, count)
+	}
+	return err
 }
 
 // user_role crud
@@ -316,7 +319,7 @@ func deleteUserRole(ur UserRoles) (count int64, e error) {
 		return 0, err
 	}
 
-	log.Printf("Deletion of user_role record %d successful, %d row(s) effected", ur.Id, count)
+	log.Printf("Deletion of user_role record %d successful, %d row(s) affected", ur.Id, count)
 	return count, err
 }
 
@@ -376,7 +379,7 @@ func updateAddress(address Address) (err error) {
 
 	db.Close()
 
-	log.Printf("Updated address record %d in the backup auth database. %d rows effected. ", address.Id, count)
+	log.Printf("Updated address record %d in the backup auth database. %d rows affected. ", address.Id, count)
 	return err
 }
 
@@ -482,7 +485,7 @@ func deleteUserAddress(ua UserAddresses) (count int64, e error) {
 		return 0, err
 	}
 
-	log.Printf("Deletion of user_address record %d successful, %d row(s) effected", ua.Id, count)
+	log.Printf("Deletion of user_address record %d successful, %d row(s) affected", ua.Id, count)
 	return count, err
 }
 
@@ -537,7 +540,7 @@ func updatePhone(phone Phone) (err error) {
 
 	db.Close()
 
-	log.Printf("Updated phone record %d in the backup auth database. %d rows effected. ", phone.Id, count)
+	log.Printf("Updated phone record %d in the backup auth database. %d rows affected. ", phone.Id, count)
 	return err
 }
 
@@ -643,6 +646,6 @@ func deleteUserPhone(up UserPhones) (count int64, e error) {
 		return 0, err
 	}
 
-	log.Printf("Deletion of user_phone record %d successful, %d row(s) effected", up.Id, count)
+	log.Printf("Deletion of user_phone record %d successful, %d row(s) affected", up.Id, count)
 	return count, err
 }
