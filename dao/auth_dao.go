@@ -268,7 +268,7 @@ func DeleteRole(role Role) (e error) {
 }
 
 // user_role crud
-func insertUserRole(userid int64, ur UserRoles) (err error) {
+func InsertUserRole(userid int64, ur UserRoles) (err error) {
 
 	db := dbConn(AUTH_BACKUP_DB)
 	defer db.Close()
@@ -298,7 +298,38 @@ func insertUserRole(userid int64, ur UserRoles) (err error) {
 	return err
 }
 
-func deleteUserRole(ur UserRoles) (count int64, e error) {
+type UrXref struct {
+	Id      int64
+	User_id int64
+	Role_id int64
+}
+
+func FindUserRolesByUserId(id int64) (ur []UrXref, e error) {
+
+	db := dbConn(AUTH_BACKUP_DB)
+	defer db.Close()
+
+	query := "SELECT id, user_id, role_id FROM user_role WHERE user_id = ?"
+	rs, err := db.Query(query, id)
+	if err != nil {
+		return nil, err
+	}
+
+	for rs.Next() {
+
+		var xref UrXref
+		err := rs.Scan(&xref.Id, &xref.User_id, &xref.Role_id)
+		if err != nil {
+			log.Fatal(err)
+		}
+		ur = append(ur, xref)
+	}
+
+	db.Close()
+	return ur, e
+}
+
+func DeleteUserRole(id int64) (e error) {
 
 	db := dbConn(AUTH_BACKUP_DB)
 	defer db.Close()
@@ -306,21 +337,22 @@ func deleteUserRole(ur UserRoles) (count int64, e error) {
 	query := "DELETE FROM user_role WHERE id = ?"
 	stmt, err := db.Prepare(query)
 	if err != nil {
-		return 0, err
+		return err
 	}
 
-	r, err := stmt.Exec(ur.Id)
+	r, err := stmt.Exec(id)
 	if err != nil {
-		return 0, err
+		return err
 	}
 
-	count, err = r.RowsAffected()
+	count, err := r.RowsAffected()
 	if err != nil {
-		return 0, err
+		return err
 	}
-
-	log.Printf("Deletion of user_role record %d successful, %d row(s) affected", ur.Id, count)
-	return count, err
+	if count > 0 {
+		log.Printf("Deletion of user_role record %d successful, %d row(s) affected", id, count)
+	}
+	return err
 }
 
 // address crud

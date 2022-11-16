@@ -16,6 +16,7 @@ func BackupAuthService() {
 	}
 
 	// reconcile lookup tables: roles
+	// putting here so constraints are violated if role deleted that still has xref
 	reconcileRoles(auth)
 
 	// get all users in db
@@ -23,11 +24,6 @@ func BackupAuthService() {
 	if err != nil {
 		panic(err)
 	}
-
-	// bkRoles, err := dao.FindAllRoles()
-	// if err != nil {
-	// 	panic(err)
-	// }
 
 	var wg sync.WaitGroup
 	wg.Add(len(auth))
@@ -43,6 +39,7 @@ func BackupAuthService() {
 			} else {
 				err = dao.InsertUser(u)
 			}
+			reconcileUserRoles(u)
 		}(v)
 	}
 
@@ -132,7 +129,56 @@ func rolePresent(id int64, dbRoles []dao.Role) bool {
 	return exists
 }
 
-func updateUserRoles(rs, bkrs []dao.Role) (err error) {
+func reconcileUserRoles(user dao.User) (err error) {
+
+	bkur, err := dao.FindUserRolesByUserId(user.Id)
+	if err != nil {
+		return err
+	}
+
+	var wg sync.WaitGroup
+	wg.Add(len(user.UserRoles) + len(bkur))
+	for _, v := range user.UserRoles {
+
+		go func(ur dao.UserRoles) {
+			defer wg.Done()
+			if !urInBackup(ur.Id, bkur) || len(bkur) == 0 {
+				err = dao.InsertUserRole(user.Id, ur)
+			}
+		}(v)
+	}
+
+	for _, v := range bkur {
+
+		go func(ur dao.UrXref) {
+			defer wg.Done()
+			if !urPresent(ur.Id, user.UserRoles) {
+				err = dao.DeleteUserRole(ur.Id)
+			}
+		}(v)
+	}
+
+	wg.Wait()
 
 	return err
+}
+
+func urInBackup(id int64, ur []dao.UrXref) bool {
+	exists := false
+	for _, v := range ur {
+		if v.Id == id {
+			exists = true
+		}
+	}
+	return exists
+}
+
+func urPresent(id int64, ur []dao.UserRoles) bool {
+	exists := false
+	for _, v := range ur {
+		if v.Id == id {
+			exists = true
+		}
+	}
+	return exists
 }

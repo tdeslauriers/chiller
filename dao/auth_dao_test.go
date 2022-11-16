@@ -41,3 +41,11 @@ func TestFindAllUsers(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestFindUserRoles(t *testing.T) {
+
+	ur, _ := FindUserRolesByUserId(7)
+
+	t.Log(ur)
+
+}

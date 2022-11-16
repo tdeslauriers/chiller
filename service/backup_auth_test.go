@@ -20,9 +20,21 @@ func TestReconileRoles(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	
 
 	reconcileRoles(auth)
+}
+
+func TestReconileUserRoles(t *testing.T) {
+
+	auth, err := http_client.GetAuthServiceData()
+	if err != nil {
+		panic(err)
+	}
+
+	for _, v := range auth {
+
+		t.Log(reconcileUserRoles(v))
+	}
 }
 
 func TestGoPractice(t *testing.T) {
