@@ -24,6 +24,12 @@ type UserRoles struct {
 	Role Role  `json:"role"`
 }
 
+type UrXref struct {
+	Id      int64
+	User_id int64
+	Role_id int64
+}
+
 type Role struct {
 	Id          int64  `json:"id"`
 	Role        string `json:"role"`
@@ -34,6 +40,12 @@ type Role struct {
 type UserAddresses struct {
 	Id      int64   `json:"id"`
 	Address Address `json:"address"`
+}
+
+type UaXref struct {
+	Id         int64
+	User_id    int64
+	Address_id int64
 }
 
 type Address struct {
@@ -49,6 +61,12 @@ type UserPhones struct {
 	Phone Phone `json:"phone"`
 }
 
+type UpXref struct {
+	Id       int64
+	User_id  int64
+	Phone_id int64
+}
+
 type Phone struct {
 	Id    int64  `json:"id"`
 	Phone string `json:"phone"`
@@ -56,3 +74,24 @@ type Phone struct {
 }
 
 // gallery persistence objects
+type Image struct {
+	Id          int64         `json:"id"`
+	Filename    string        `json:"filename"`
+	Title       string        `json:"title"`
+	Description string        `json:"description"`
+	Date        string        `json:"date"`
+	Published   bool          `json:"published"`
+	Thumbnail   string        `json:"thumbnail"`
+	Image       string        `json:"image"`
+	AlbumImages []AlbumImages `json:"albumImages"`
+}
+
+type Album struct {
+	Id    int64  `json:"id"`
+	Album string `json:"album"`
+}
+
+type AlbumImages struct {
+	Id    int64 `json:"id"`
+	Album Album `json:"album"`
+}

@@ -14,28 +14,28 @@ func TestBackupAuthService(t *testing.T) {
 	BackupAuthService()
 }
 
-func TestReconileRoles(t *testing.T) {
+// func TestReconileRoles(t *testing.T) {
 
-	auth, err := http_client.GetAuthServiceData()
-	if err != nil {
-		panic(err)
-	}
+// 	auth, err := http_client.GetAuthServiceData()
+// 	if err != nil {
+// 		panic(err)
+// 	}
 
-	reconcileRoles(auth)
-}
+// 	reconcileRoles(auth)
+// }
 
-func TestReconileUserRoles(t *testing.T) {
+// func TestReconileUserRoles(t *testing.T) {
 
-	auth, err := http_client.GetAuthServiceData()
-	if err != nil {
-		panic(err)
-	}
+// 	auth, err := http_client.GetAuthServiceData()
+// 	if err != nil {
+// 		panic(err)
+// 	}
 
-	for _, v := range auth {
+// 	for _, v := range auth {
 
-		t.Log(reconcileUserRoles(v))
-	}
-}
+// 		t.Log(reconcileUserRoles(v))
+// 	}
+// }
 
 func TestGoPractice(t *testing.T) {
 
@@ -88,4 +88,23 @@ type animal[T talk] struct {
 
 func (a animal[T]) says(sound string) {
 	fmt.Print(sound)
+}
+
+func TestReconstructRoleTables(t *testing.T) {
+
+	users, err := http_client.GetAuthServiceData()
+	if err != nil {
+		panic(err)
+	}
+	urs, rs := reconstructRoleTables(users)
+	t.Log(urs)
+	t.Log(rs)
+
+	uas, as := reconstructAddressTables(users)
+	t.Log(uas)
+	t.Log(as)
+
+	ups, ps := reconstructPhoneTables(users)
+	t.Log(ups)
+	t.Log(ps)
 }

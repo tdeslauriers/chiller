@@ -3,170 +3,429 @@ package service
 import (
 	"chiller/dao"
 	"chiller/http_client"
+	"log"
 
 	"sync"
 )
 
 func BackupAuthService() {
 
-	// get user data from auth service
-	auth, err := http_client.GetAuthServiceData()
+	// get user data from users service
+	users, err := http_client.GetAuthServiceData()
 	if err != nil {
 		panic(err)
 	}
+	urs, rs := reconstructRoleTables(users)
+	uas, as := reconstructAddressTables(users)
+	ups, ps := reconstructPhoneTables(users)
 
-	// reconcile lookup tables: roles
-	// putting here so constraints are violated if role deleted that still has xref
-	reconcileRoles(auth)
+	// BACKUP RECORD INSERTIONS/UPDATES
+	var wgTables sync.WaitGroup
+	wgTables.Add(len(users) + len(rs) + len(as) + len(ps))
 
-	// get all users in db
-	bkUsers, err := dao.FindAllUsers()
+	// insert or update user backup records
+	for _, v := range users {
+		go func(u dao.User) {
+			defer wgTables.Done()
+
+			if err := dao.InsertUser(u); err != nil {
+				if err := dao.UpdateUser(u); err != nil {
+					log.Fatal(err)
+				}
+			}
+		}(v)
+	}
+
+	// insert or update role backup records
+	for _, v := range rs {
+		go func(r dao.Role) {
+			defer wgTables.Done()
+
+			if err := dao.InsertRole(r); err != nil {
+				if err := dao.UpdateRole(r); err != nil {
+					log.Fatal(err)
+				}
+			}
+		}(v)
+	}
+
+	// insert or update address backup records
+	for _, v := range as {
+		go func(a dao.Address) {
+			defer wgTables.Done()
+
+			if err := dao.InsertAddress(a); err != nil {
+				if err := dao.UpdateAddress(a); err != nil {
+					log.Fatal(err)
+				}
+			}
+		}(v)
+	}
+
+	// insert or update phone backup records
+	for _, v := range ps {
+		go func(p dao.Phone) {
+			defer wgTables.Done()
+
+			if err := dao.InsertPhone(p); err != nil {
+				if err := dao.UpdatePhone(p); err != nil {
+					log.Fatal(err)
+				}
+			}
+		}(v)
+	}
+
+	wgTables.Wait()
+
+	var wgXref sync.WaitGroup
+	wgXref.Add(len(urs) + len(uas) + len(ups))
+
+	// insert user_role backup(xref) records
+	for _, v := range urs {
+		go func(ur dao.UrXref) {
+			defer wgXref.Done()
+			dao.InsertUserRole(ur) // dumping errs
+		}(v)
+	}
+
+	// insert user_address(xref) backup records
+	for _, v := range uas {
+		go func(ua dao.UaXref) {
+			defer wgXref.Done()
+			dao.InsertUserAdress(ua)
+		}(v)
+	}
+
+	// insert user_phone(xref) backup records
+	for _, v := range ups {
+		go func(up dao.UpXref) {
+			defer wgXref.Done()
+			dao.InsertUserPhone(up)
+		}(v)
+	}
+
+	wgXref.Wait()
+
+	// DELETIONS
+	// delete backup records no longer present in auth-service data
+	// must do deletions in xrefs first to prevent constrain violations
+	var wgDelXref sync.WaitGroup
+	wgDelXref.Add(3)
+
+	go func(userRoles []dao.UrXref) {
+		defer wgDelXref.Done()
+		deleteUserRolesFromBackup(userRoles)
+	}(urs)
+
+	go func(userAddresses []dao.UaXref) {
+		defer wgDelXref.Done()
+		deleteUserAddressesFromBackup(userAddresses)
+	}(uas)
+
+	go func(userPhones []dao.UpXref) {
+		defer wgDelXref.Done()
+		deleteUserPhonesFromBackup(userPhones)
+	}(ups)
+
+	wgDelXref.Wait()
+
+	// primary table deletions
+	var wgDelTables sync.WaitGroup
+	wgDelTables.Add(4)
+
+	go func(us []dao.User) {
+		defer wgDelTables.Done()
+		deleteUsersFromBackup(us)
+	}(users)
+
+	go func(roles []dao.Role) {
+		defer wgDelTables.Done()
+		deleteRolesFromBackup(roles)
+	}(rs)
+
+	go func(addresses []dao.Address) {
+		defer wgDelTables.Done()
+		deleteAddressesFromBackup(addresses)
+	}(as)
+
+	go func(phones []dao.Phone) {
+		defer wgDelTables.Done()
+		deletePhonesFromBackUp(phones)
+	}(ps)
+
+	wgDelTables.Wait()
+	log.Print("Complete")
+}
+
+func deletePhonesFromBackUp(phones []dao.Phone) {
+	bkPhones, err := dao.FindAllPhones()
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	var wg sync.WaitGroup
-	wg.Add(len(auth))
+	wg.Add(len(bkPhones))
+	for _, v := range bkPhones {
+		go func(p dao.Phone) {
+			defer wg.Done()
 
-	// compare --> insert vs update
-	for _, v := range auth {
+			exists := false
+			for _, phone := range phones {
+				if p.Id == phone.Id {
+					exists = true
+				}
+			}
+			if !exists {
+				if err := dao.DeletePhone(p.Id); err != nil {
+					log.Fatal(err)
+				}
+			}
+		}(v)
+	}
+	wg.Wait()
+}
 
+func deleteAddressesFromBackup(addresses []dao.Address) {
+	bkAddresses, err := dao.FindAllAddresses()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var wg sync.WaitGroup
+	wg.Add(len(bkAddresses))
+	for _, v := range bkAddresses {
+		go func(a dao.Address) {
+			defer wg.Done()
+
+			exists := false
+			for _, address := range addresses {
+				if a.Id == address.Id {
+					exists = true
+				}
+			}
+			if !exists {
+				if err := dao.DeleteAddress(a.Id); err != nil {
+					log.Fatal(err)
+				}
+			}
+		}(v)
+	}
+	wg.Wait()
+}
+
+func deleteRolesFromBackup(roles []dao.Role) {
+	bkRoles, err := dao.FindAllRoles()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var wg sync.WaitGroup
+	wg.Add(len(bkRoles))
+	for _, v := range bkRoles {
+		go func(r dao.Role) {
+			defer wg.Done()
+
+			exists := false
+			for _, role := range roles {
+				if r.Id == role.Id {
+					exists = true
+				}
+			}
+			if !exists {
+				if err := dao.DeleteRole(r.Id); err != nil {
+					log.Fatal(err)
+				}
+			}
+		}(v)
+	}
+	wg.Wait()
+}
+
+func deleteUsersFromBackup(users []dao.User) {
+	bkUsers, err := dao.FindAllUsers()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var wg sync.WaitGroup
+	wg.Add(len(bkUsers))
+
+	for _, v := range bkUsers {
 		go func(u dao.User) {
 			defer wg.Done()
 
-			inBackup := false
-			for _, v := range bkUsers {
-				if v.Id == u.Id {
-					inBackup = true
-				}
-			}
-			if inBackup {
-				err = dao.UpdateUser(u)
-			} else {
-				err = dao.InsertUser(u)
-			}
-			reconcileUserRoles(u)
-		}(v)
-	}
-
-	wg.Wait()
-
-}
-
-// Roles: different process because only real many-to-many
-// need to do update on role table first
-func reconcileRoles(users []dao.User) error {
-
-	roles := make([]dao.Role, 0)
-	for _, v := range users {
-		for _, ur := range v.UserRoles {
-
-			isConsolidated := false
-			for _, v := range roles {
-				if v.Id == ur.Id {
-					isConsolidated = true
-				}
-			}
-			if len(roles) == 0 || !isConsolidated {
-				roles = append(roles, ur.Role)
-			}
-		}
-	}
-
-	dbRoles, err := dao.FindAllRoles()
-	if err != nil {
-		return err
-	}
-
-	var wg sync.WaitGroup
-	wg.Add(len(roles) + len(dbRoles))
-	for _, v := range roles {
-
-		go func(r dao.Role) {
-			defer wg.Done()
-
 			exists := false
-			for _, v := range dbRoles {
-				if v.Id == r.Id {
+			for _, user := range users {
+				if u.Id == user.Id {
 					exists = true
 				}
 			}
-			if exists && len(dbRoles) != 0 {
-				err = dao.UpdateRole(r)
-			} else {
-				err = dao.InsertRole(r)
-			}
-		}(v)
-	}
-
-	// delete from backup because no longer in auth service
-	for _, v := range dbRoles {
-
-		go func(r dao.Role) {
-			defer wg.Done()
-
-			exists := false
-			for _, v := range roles {
-				if v.Id == r.Id {
-					exists = true
+			if !exists {
+				if err := dao.DeleteUser(u.Id); err != nil {
+					log.Fatal(err)
 				}
-			}
-			if !exists && len(roles) != 0 {
-				err = dao.DeleteRole(r)
 			}
 		}(v)
 	}
 
 	wg.Wait()
-
-	return err
 }
 
-func reconcileUserRoles(user dao.User) (err error) {
-
-	bkur, err := dao.FindUserRolesByUserId(user.Id)
+func deleteUserRolesFromBackup(urs []dao.UrXref) {
+	bkUrs, err := dao.FindAllUserroles()
 	if err != nil {
-		return err
+		log.Fatal(err)
 	}
 
 	var wg sync.WaitGroup
-	wg.Add(len(user.UserRoles) + len(bkur))
-	for _, v := range user.UserRoles {
-
-		go func(ur dao.UserRoles) {
-			defer wg.Done()
-
-			exists := false // in back up data.
-			for _, v := range bkur {
-				if ur.Id == v.Id {
-					exists = true
-				}
-			}
-			if !exists || len(bkur) == 0 {
-				err = dao.InsertUserRole(user.Id, ur)
-			}
-		}(v)
-	}
-
-	for _, v := range bkur {
-
+	wg.Add(len(bkUrs))
+	for _, v := range bkUrs {
 		go func(ur dao.UrXref) {
 			defer wg.Done()
 
-			exists := false // in the auth-service json data
-			for _, v := range user.UserRoles {
-				if ur.Id == v.Id {
+			exists := false
+			for _, userRole := range urs {
+				if ur.Id == userRole.Id {
 					exists = true
 				}
 			}
-
 			if !exists {
-				err = dao.DeleteUserRole(ur.Id)
+				if err := dao.DeleteUserRole(ur.Id); err != nil {
+					log.Fatal(err)
+				}
 			}
 		}(v)
 	}
-
 	wg.Wait()
+}
 
-	return err
+func deleteUserAddressesFromBackup(uas []dao.UaXref) {
+	bkUas, err := dao.FindAllUserAddresses()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var wg sync.WaitGroup
+	wg.Add(len(bkUas))
+
+	for _, v := range bkUas {
+		go func(ua dao.UaXref) {
+			defer wg.Done()
+
+			exists := false
+			for _, userAddress := range uas {
+				if ua.Id == userAddress.Id {
+					exists = true
+				}
+			}
+			if !exists {
+				if err := dao.DeleteUserAddress(ua.Id); err != nil {
+					log.Fatal(err)
+				}
+			}
+		}(v)
+	}
+	wg.Wait()
+}
+
+func deleteUserPhonesFromBackup(ups []dao.UpXref) {
+	bkUps, err := dao.FindAllUserPhones()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var wg sync.WaitGroup
+	wg.Add(len(bkUps))
+
+	for _, v := range bkUps {
+		go func(up dao.UpXref) {
+			defer wg.Done()
+
+			exists := false
+			for _, userPhone := range ups {
+				if up.Id == userPhone.Id {
+					exists = true
+				}
+			}
+			if !exists {
+				if err := dao.DeleteUserPhone(up.Id); err != nil {
+					log.Fatal(err)
+				}
+			}
+		}(v)
+	}
+	wg.Wait()
+}
+
+func reconstructRoleTables(users []dao.User) (urs []dao.UrXref, rs []dao.Role) {
+
+	for _, v := range users {
+		// user_role table records unique to user: dupe check unnecessary
+		for _, userRole := range v.UserRoles {
+			ur := dao.UrXref{Id: userRole.Id, User_id: v.Id, Role_id: userRole.Role.Id}
+			urs = append(urs, ur)
+		}
+
+		// dupe check necessary for roles
+		for _, ur := range v.UserRoles {
+			exists := false
+			for _, role := range rs {
+				if ur.Role.Id == role.Id {
+					exists = true
+				}
+			}
+			if !exists {
+				rs = append(rs, ur.Role)
+			}
+		}
+	}
+	return urs, rs
+}
+
+func reconstructAddressTables(users []dao.User) (uas []dao.UaXref, as []dao.Address) {
+
+	for _, v := range users {
+
+		for _, userAddress := range v.UserAddresses {
+			ua := dao.UaXref{Id: userAddress.Id, User_id: v.Id, Address_id: userAddress.Address.Id}
+			uas = append(uas, ua)
+		}
+
+		for _, ua := range v.UserAddresses {
+			exists := false
+			for _, address := range as {
+				if ua.Address.Id == address.Id {
+					exists = true
+				}
+			}
+			if !exists {
+				as = append(as, ua.Address)
+			}
+		}
+	}
+	return uas, as
+}
+
+func reconstructPhoneTables(users []dao.User) (ups []dao.UpXref, ps []dao.Phone) {
+
+	for _, v := range users {
+
+		for _, userPhone := range v.UserPhones {
+			up := dao.UpXref{Id: userPhone.Id, User_id: v.Id, Phone_id: userPhone.Phone.Id}
+			ups = append(ups, up)
+		}
+
+		for _, up := range v.UserPhones {
+			exists := false
+			for _, phone := range ps {
+				if up.Phone.Id == phone.Id {
+					exists = true
+				}
+			}
+			if !exists {
+				ps = append(ps, up.Phone)
+			}
+		}
+	}
+	return ups, ps
 }

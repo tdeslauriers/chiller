@@ -16,13 +16,13 @@ var (
 
 // DBConn is db connector function
 func dbConn(name string) *sql.DB {
+
 	var url = fmt.Sprintf("%s:%s@tcp(%s)/%s?parseTime=true", user, pass, dbIP, name)
 	db, err := sql.Open("mysql", url)
 	if err != nil {
 		fmt.Printf("Cannot connect to database: %s/%s\n", dbIP, name)
 		log.Fatal("Database connection error: ", err)
-	} else {
-		fmt.Printf("Connected to: %s/%s\n", dbIP, name)
 	}
+
 	return db
 }
