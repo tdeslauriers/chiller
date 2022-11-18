@@ -154,7 +154,7 @@ func BackupAuthService() {
 	}(ps)
 
 	wgDelTables.Wait()
-	log.Print("Complete")
+	log.Print("Completed backup activites of auth-service.")
 }
 
 func deletePhonesFromBackUp(phones []dao.Phone) {
