@@ -176,7 +176,8 @@ func deletePhonesFromBackUp(phones []dao.Phone) {
 				}
 			}
 			if !exists {
-				if err := dao.DeletePhone(p.Id); err != nil {
+				record := dao.Record[dao.Phone]{Id: p.Id}
+				if err := dao.DeleteRecord(record, dao.DELETE_PHONE); err != nil {
 					log.Fatal(err)
 				}
 			}
@@ -204,7 +205,8 @@ func deleteAddressesFromBackup(addresses []dao.Address) {
 				}
 			}
 			if !exists {
-				if err := dao.DeleteAddress(a.Id); err != nil {
+				record := dao.Record[dao.Address]{Id: a.Id}
+				if err := dao.DeleteRecord(record, dao.DELETE_ADDRESS); err != nil {
 					log.Fatal(err)
 				}
 			}
