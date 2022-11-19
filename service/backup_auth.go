@@ -234,7 +234,8 @@ func deleteRolesFromBackup(roles []dao.Role) {
 				}
 			}
 			if !exists {
-				if err := dao.DeleteRole(r.Id); err != nil {
+				record := dao.Record[dao.Role]{Id: r.Id}
+				if err := dao.DeleteRecord(record, dao.DELETE_ROLE); err != nil {
 					log.Fatal(err)
 				}
 			}
@@ -263,7 +264,8 @@ func deleteUsersFromBackup(users []dao.User) {
 				}
 			}
 			if !exists {
-				if err := dao.DeleteUser(u.Id); err != nil {
+				record := dao.Record[dao.User]{Id: u.Id}
+				if err := dao.DeleteRecord(record, dao.DELETE_USER); err != nil {
 					log.Fatal(err)
 				}
 			}
@@ -292,7 +294,8 @@ func deleteUserRolesFromBackup(urs []dao.UrXref) {
 				}
 			}
 			if !exists {
-				if err := dao.DeleteUserRole(ur.Id); err != nil {
+				r := dao.Record[dao.UrXref]{Id: ur.Id}
+				if err := dao.DeleteRecord(r, dao.DELETE_UR); err != nil {
 					log.Fatal(err)
 				}
 			}
@@ -321,7 +324,8 @@ func deleteUserAddressesFromBackup(uas []dao.UaXref) {
 				}
 			}
 			if !exists {
-				if err := dao.DeleteUserAddress(ua.Id); err != nil {
+				r := dao.Record[dao.UaXref]{Id: ua.Id}
+				if err := dao.DeleteRecord(r, dao.DELETE_UA); err != nil {
 					log.Fatal(err)
 				}
 			}
@@ -350,7 +354,8 @@ func deleteUserPhonesFromBackup(ups []dao.UpXref) {
 				}
 			}
 			if !exists {
-				if err := dao.DeleteUserPhone(up.Id); err != nil {
+				r := dao.Record[dao.UpXref]{Id: up.Id}
+				if err := dao.DeleteRecord(r, dao.DELETE_UP); err != nil {
 					log.Fatal(err)
 				}
 			}

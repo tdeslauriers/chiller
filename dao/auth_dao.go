@@ -130,32 +130,6 @@ func FindAllUsers() (users []User, e error) {
 	return users, e
 }
 
-func DeleteUser(id int64) (e error) {
-
-	db := dbConn(AUTH_BACKUP_DB)
-	defer db.Close()
-
-	query := "DELETE FROM user WHERE id = ?"
-	stmt, err := db.Prepare(query)
-	if err != nil {
-		return err
-	}
-
-	r, err := stmt.Exec(id)
-	if err != nil {
-		return err
-	}
-
-	count, err := r.RowsAffected()
-	if err != nil {
-		return err
-	}
-	if count > 0 {
-		log.Printf("Deletion of user record %d successful, %d row(s) affected", id, count)
-	}
-	return err
-}
-
 // Role Crud
 func InsertRole(role Role) (err error) {
 
@@ -241,33 +215,6 @@ func FindAllRoles() (roles []Role, e error) {
 	return roles, e
 }
 
-func DeleteRole(id int64) (e error) {
-
-	db := dbConn(AUTH_BACKUP_DB)
-	defer db.Close()
-
-	query := "DELETE FROM role WHERE id = ?"
-	stmt, err := db.Prepare(query)
-	if err != nil {
-		return err
-	}
-
-	r, err := stmt.Exec(id)
-	if err != nil {
-		return err
-	}
-
-	count, err := r.RowsAffected()
-	if err != nil {
-		return err
-	}
-
-	if count > 0 {
-		log.Printf("Deletion of role record %d successful, %d row(s) affected", id, count)
-	}
-	return err
-}
-
 // user_role crud
 func InsertUserRole(ur UrXref) (err error) {
 
@@ -346,32 +293,6 @@ func FindUserRolesByUserId(id int64) (ur []UrXref, e error) {
 
 	db.Close()
 	return ur, e
-}
-
-func DeleteUserRole(id int64) (e error) {
-
-	db := dbConn(AUTH_BACKUP_DB)
-	defer db.Close()
-
-	query := "DELETE FROM user_role WHERE id = ?"
-	stmt, err := db.Prepare(query)
-	if err != nil {
-		return err
-	}
-
-	r, err := stmt.Exec(id)
-	if err != nil {
-		return err
-	}
-
-	count, err := r.RowsAffected()
-	if err != nil {
-		return err
-	}
-	if count > 0 {
-		log.Printf("Deletion of user_role record %d successful, %d row(s) affected", id, count)
-	}
-	return err
 }
 
 // address crud
@@ -516,58 +437,7 @@ func InsertUserAdress(ua UaXref) (err error) {
 	return err
 }
 
-func DeleteUserAddress(id int64) (e error) {
-
-	db := dbConn(AUTH_BACKUP_DB)
-	defer db.Close()
-
-	query := "DELETE FROM user_address WHERE id = ?"
-	stmt, err := db.Prepare(query)
-	if err != nil {
-		return err
-	}
-
-	r, err := stmt.Exec(id)
-	if err != nil {
-		return err
-	}
-
-	count, err := r.RowsAffected()
-	if err != nil {
-		return err
-	}
-	if count > 0 {
-		log.Printf("Deletion of user_address record %d successful, %d row(s) affected", id, count)
-	}
-	return err
-}
-
 // phone crud
-
-func FindAllUserPhones() (ups []UpXref, e error) {
-
-	db := dbConn(AUTH_BACKUP_DB)
-	defer db.Close()
-
-	query := "SELECT id, user_id, phone_id FROM user_phone"
-	rs, err := db.Query(query)
-	if err != nil {
-		return nil, err
-	}
-
-	for rs.Next() {
-
-		var up UpXref
-		err := rs.Scan(&up.Id, &up.User_id, &up.Phone_id)
-		if err != nil {
-			log.Fatal(err)
-		}
-		ups = append(ups, up)
-	}
-
-	db.Close()
-	return ups, e
-}
 func InsertPhone(phone Phone) (err error) {
 
 	db := dbConn(AUTH_BACKUP_DB)
@@ -649,6 +519,31 @@ func FindAllPhones() (phones []Phone, e error) {
 }
 
 // user_phone crud
+func FindAllUserPhones() (ups []UpXref, e error) {
+
+	db := dbConn(AUTH_BACKUP_DB)
+	defer db.Close()
+
+	query := "SELECT id, user_id, phone_id FROM user_phone"
+	rs, err := db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+
+	for rs.Next() {
+
+		var up UpXref
+		err := rs.Scan(&up.Id, &up.User_id, &up.Phone_id)
+		if err != nil {
+			log.Fatal(err)
+		}
+		ups = append(ups, up)
+	}
+
+	db.Close()
+	return ups, e
+}
+
 func InsertUserPhone(up UpXref) (err error) {
 
 	db := dbConn(AUTH_BACKUP_DB)
@@ -676,32 +571,6 @@ func InsertUserPhone(up UpXref) (err error) {
 	db.Close()
 
 	log.Printf("UserPhone xref Record %d inserted into backup auth database.", id)
-	return err
-}
-
-func DeleteUserPhone(id int64) (e error) {
-
-	db := dbConn(AUTH_BACKUP_DB)
-	defer db.Close()
-
-	query := "DELETE FROM user_phone WHERE id = ?"
-	stmt, err := db.Prepare(query)
-	if err != nil {
-		return err
-	}
-
-	r, err := stmt.Exec(id)
-	if err != nil {
-		return err
-	}
-
-	count, err := r.RowsAffected()
-	if err != nil {
-		return err
-	}
-	if count > 0 {
-		log.Printf("Deletion of user_phone record %d successful, %d row(s) affected", id, count)
-	}
 	return err
 }
 
@@ -744,7 +613,7 @@ func DeleteRecord[T row](record Record[T], query string) (e error) {
 		return err
 	}
 	if count > 0 {
-		log.Printf("Deletion of %T record %d successful, %d row(s) affected", record, record.Id, count)
+		log.Printf("Deletion of %T record %d successful; %d row(s) affected", record, record.Id, count)
 	}
 	return err
 }
