@@ -84,7 +84,10 @@ func BackupAuthService() {
 	for _, v := range urs {
 		go func(ur dao.UrXref) {
 			defer wgXref.Done()
-			dao.InsertUserRole(ur) // dumping errs
+
+			r := dao.XrefRecord[dao.UrXref]{Id: ur.Id, Fk_1: ur.User_id, Fk_2: ur.Role_id}
+			dao.InsertXrefRecord(r, dao.INSERT_UR) // dumping error
+
 		}(v)
 	}
 
@@ -92,7 +95,9 @@ func BackupAuthService() {
 	for _, v := range uas {
 		go func(ua dao.UaXref) {
 			defer wgXref.Done()
-			dao.InsertUserAdress(ua)
+
+			r := dao.XrefRecord[dao.UaXref]{Id: ua.Id, Fk_1: ua.User_id, Fk_2: ua.Address_id}
+			dao.InsertXrefRecord(r, dao.INSERT_UA)
 		}(v)
 	}
 
@@ -100,7 +105,10 @@ func BackupAuthService() {
 	for _, v := range ups {
 		go func(up dao.UpXref) {
 			defer wgXref.Done()
-			dao.InsertUserPhone(up)
+
+			r := dao.XrefRecord[dao.UpXref]{Id: up.Id, Fk_1: up.User_id, Fk_2: up.Phone_id}
+			dao.InsertXrefRecord(r, dao.INSERT_UP)
+
 		}(v)
 	}
 
@@ -276,7 +284,7 @@ func deleteUsersFromBackup(users []dao.User) {
 }
 
 func deleteUserRolesFromBackup(urs []dao.UrXref) {
-	bkUrs, err := dao.FindAllUserroles()
+	bkUrs, err := dao.FindAllXrefs[dao.UrXref](dao.FINDALL_UR)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -284,7 +292,7 @@ func deleteUserRolesFromBackup(urs []dao.UrXref) {
 	var wg sync.WaitGroup
 	wg.Add(len(bkUrs))
 	for _, v := range bkUrs {
-		go func(ur dao.UrXref) {
+		go func(ur dao.XrefRecord[dao.UrXref]) {
 			defer wg.Done()
 
 			exists := false
@@ -305,7 +313,7 @@ func deleteUserRolesFromBackup(urs []dao.UrXref) {
 }
 
 func deleteUserAddressesFromBackup(uas []dao.UaXref) {
-	bkUas, err := dao.FindAllUserAddresses()
+	bkUas, err := dao.FindAllXrefs[dao.UaXref](dao.FINDALL_UA)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -314,7 +322,7 @@ func deleteUserAddressesFromBackup(uas []dao.UaXref) {
 	wg.Add(len(bkUas))
 
 	for _, v := range bkUas {
-		go func(ua dao.UaXref) {
+		go func(ua dao.XrefRecord[dao.UaXref]) {
 			defer wg.Done()
 
 			exists := false
@@ -335,7 +343,7 @@ func deleteUserAddressesFromBackup(uas []dao.UaXref) {
 }
 
 func deleteUserPhonesFromBackup(ups []dao.UpXref) {
-	bkUps, err := dao.FindAllUserPhones()
+	bkUps, err := dao.FindAllXrefs[dao.UpXref](dao.FINDALL_UP)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -344,7 +352,7 @@ func deleteUserPhonesFromBackup(ups []dao.UpXref) {
 	wg.Add(len(bkUps))
 
 	for _, v := range bkUps {
-		go func(up dao.UpXref) {
+		go func(up dao.XrefRecord[dao.UpXref]) {
 			defer wg.Done()
 
 			exists := false

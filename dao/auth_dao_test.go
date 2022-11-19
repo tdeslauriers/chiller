@@ -42,10 +42,8 @@ func TestFindAllUsers(t *testing.T) {
 	}
 }
 
-func TestFindUserRoles(t *testing.T) {
+func TestFindAllXrefs(t *testing.T) {
 
-	ur, _ := FindUserRolesByUserId(7)
-
-	t.Log(ur)
-
+	urs, _ := FindAllXrefs[UrXref](FINDALL_UR)
+	t.Log(urs)
 }

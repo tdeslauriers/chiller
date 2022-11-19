@@ -18,6 +18,118 @@ func birthdayNullString(bd string) sql.NullString {
 	}
 }
 
+type row interface {
+	User | Role | Address | Phone | UserRoles | UserAddresses | UserPhones | UrXref | UaXref | UpXref
+}
+
+type Record[T row] struct {
+	Id int64
+}
+
+type XrefRecord[T row] struct {
+	Id   int64
+	Fk_1 int64
+	Fk_2 int64
+}
+
+// Xref inserts + Find alls
+const (
+	INSERT_UR  = "INSERT INTO user_role (id, user_id, role_id) VALUES (?, ?, ?);"
+	INSERT_UA  = "INSERT INTO user_address (id, user_id, address_id) VALUES (?, ?, ?);"
+	INSERT_UP  = "INSERT INTO user_phone (id, user_id, phone_id) VALUES (?, ?, ?);"
+	FINDALL_UR = "SELECT id, user_id, role_id FROM user_role"
+	FINDALL_UA = "SELECT id, user_id, address_id FROM user_address"
+	FINDALL_UP = "SELECT id, user_id, phone_id FROM user_phone"
+)
+
+func InsertXrefRecord[T row](r XrefRecord[T], query string) (err error) {
+
+	db := dbConn(AUTH_BACKUP_DB)
+	defer db.Close()
+
+	stmt, err := db.Prepare(query)
+	if err != nil {
+		return err
+	}
+
+	result, err := stmt.Exec(
+		r.Id,
+		r.Fk_1,
+		r.Fk_2)
+	if err != nil {
+		return err
+	}
+
+	id, err := result.LastInsertId()
+	if err != nil {
+		return err
+	}
+
+	db.Close()
+
+	log.Printf("%T xref record %d inserted into backup auth database.", r, id)
+	return err
+}
+
+func FindAllXrefs[T row](query string) (xrefs []XrefRecord[T], e error) {
+	db := dbConn(AUTH_BACKUP_DB)
+	defer db.Close()
+
+	rs, err := db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+
+	for rs.Next() {
+
+		var xr XrefRecord[T]
+		err := rs.Scan(&xr.Id, &xr.Fk_1, &xr.Fk_2)
+		if err != nil {
+			log.Fatal(err)
+		}
+		xrefs = append(xrefs, xr)
+	}
+
+	db.Close()
+	return xrefs, e
+}
+
+// Delete Records:
+const (
+	DELETE_USER    = "DELETE FROM user WHERE id = ?"
+	DELETE_ROLE    = "DELETE FROM role WHERE id = ?"
+	DELETE_PHONE   = "DELETE FROM phone WHERE id = ?"
+	DELETE_ADDRESS = "DELETE FROM address WHERE id = ?"
+	DELETE_UR      = "DELETE FROM user_role WHERE id = ?"
+	DELETE_UA      = "DELETE FROM user_address WHERE id = ?"
+	DELETE_UP      = "DELETE FROM user_phone WHERE id = ?"
+)
+
+func DeleteRecord[T row](record Record[T], query string) (e error) {
+
+	db := dbConn(AUTH_BACKUP_DB)
+	defer db.Close()
+
+	stmt, err := db.Prepare(query)
+	if err != nil {
+		return err
+	}
+
+	result, err := stmt.Exec(record.Id)
+	if err != nil {
+		return err
+	}
+
+	count, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if count > 0 {
+		log.Printf("Deletion of %T record %d successful; %d row(s) affected", record, record.Id, count)
+	}
+	return err
+}
+
 // User Crud
 func InsertUser(user User) (err error) {
 
@@ -215,86 +327,6 @@ func FindAllRoles() (roles []Role, e error) {
 	return roles, e
 }
 
-// user_role crud
-func InsertUserRole(ur UrXref) (err error) {
-
-	db := dbConn(AUTH_BACKUP_DB)
-	defer db.Close()
-
-	query := "INSERT INTO user_role (id, user_id, role_id) VALUES (?, ?, ?);"
-	stmt, err := db.Prepare(query)
-	if err != nil {
-		return err
-	}
-
-	r, err := stmt.Exec(
-		ur.Id,
-		ur.User_id,
-		ur.Role_id)
-	if err != nil {
-		return err
-	}
-
-	id, err := r.LastInsertId()
-	if err != nil {
-		return err
-	}
-
-	db.Close()
-
-	log.Printf("UserRole xref Record %d inserted into backup auth database.", id)
-	return err
-}
-
-func FindAllUserroles() (urs []UrXref, e error) {
-	db := dbConn(AUTH_BACKUP_DB)
-	defer db.Close()
-
-	query := "SELECT id, user_id, role_id FROM user_role"
-	rs, err := db.Query(query)
-	if err != nil {
-		return nil, err
-	}
-
-	for rs.Next() {
-
-		var ur UrXref
-		err := rs.Scan(&ur.Id, &ur.User_id, &ur.Role_id)
-		if err != nil {
-			log.Fatal(err)
-		}
-		urs = append(urs, ur)
-	}
-
-	db.Close()
-	return urs, e
-}
-
-func FindUserRolesByUserId(id int64) (ur []UrXref, e error) {
-
-	db := dbConn(AUTH_BACKUP_DB)
-	defer db.Close()
-
-	query := "SELECT id, user_id, role_id FROM user_role WHERE user_id = ?"
-	rs, err := db.Query(query, id)
-	if err != nil {
-		return nil, err
-	}
-
-	for rs.Next() {
-
-		var xref UrXref
-		err := rs.Scan(&xref.Id, &xref.User_id, &xref.Role_id)
-		if err != nil {
-			log.Fatal(err)
-		}
-		ur = append(ur, xref)
-	}
-
-	db.Close()
-	return ur, e
-}
-
 // address crud
 func InsertAddress(address Address) (err error) {
 
@@ -381,62 +413,6 @@ func FindAllAddresses() (addresses []Address, e error) {
 	return addresses, e
 }
 
-// user_address crud
-func FindAllUserAddresses() (uas []UaXref, e error) {
-
-	db := dbConn(AUTH_BACKUP_DB)
-	defer db.Close()
-
-	query := "SELECT id, user_id, address_id FROM user_address"
-	rs, err := db.Query(query)
-	if err != nil {
-		return nil, err
-	}
-
-	for rs.Next() {
-
-		var ua UaXref
-		err := rs.Scan(&ua.Id, &ua.User_id, &ua.Address_id)
-		if err != nil {
-			log.Fatal(err)
-		}
-		uas = append(uas, ua)
-	}
-
-	db.Close()
-	return uas, e
-}
-
-func InsertUserAdress(ua UaXref) (err error) {
-
-	db := dbConn(AUTH_BACKUP_DB)
-	defer db.Close()
-
-	query := "INSERT INTO user_address (id, user_id, address_id) VALUES (?, ?, ?);"
-	stmt, err := db.Prepare(query)
-	if err != nil {
-		return err
-	}
-
-	r, err := stmt.Exec(
-		ua.Id,
-		ua.User_id,
-		ua.Address_id)
-	if err != nil {
-		return err
-	}
-
-	id, err := r.LastInsertId()
-	if err != nil {
-		return err
-	}
-
-	db.Close()
-
-	log.Printf("UserAddress xref Record %d inserted into backup auth database.", id)
-	return err
-}
-
 // phone crud
 func InsertPhone(phone Phone) (err error) {
 
@@ -516,104 +492,4 @@ func FindAllPhones() (phones []Phone, e error) {
 
 	db.Close()
 	return phones, e
-}
-
-// user_phone crud
-func FindAllUserPhones() (ups []UpXref, e error) {
-
-	db := dbConn(AUTH_BACKUP_DB)
-	defer db.Close()
-
-	query := "SELECT id, user_id, phone_id FROM user_phone"
-	rs, err := db.Query(query)
-	if err != nil {
-		return nil, err
-	}
-
-	for rs.Next() {
-
-		var up UpXref
-		err := rs.Scan(&up.Id, &up.User_id, &up.Phone_id)
-		if err != nil {
-			log.Fatal(err)
-		}
-		ups = append(ups, up)
-	}
-
-	db.Close()
-	return ups, e
-}
-
-func InsertUserPhone(up UpXref) (err error) {
-
-	db := dbConn(AUTH_BACKUP_DB)
-	defer db.Close()
-
-	query := "INSERT INTO user_phone (id, user_id, phone_id) VALUES (?, ?, ?);"
-	stmt, err := db.Prepare(query)
-	if err != nil {
-		return err
-	}
-
-	r, err := stmt.Exec(
-		up.Id,
-		up.User_id,
-		up.Phone_id)
-	if err != nil {
-		return err
-	}
-
-	id, err := r.LastInsertId()
-	if err != nil {
-		return err
-	}
-
-	db.Close()
-
-	log.Printf("UserPhone xref Record %d inserted into backup auth database.", id)
-	return err
-}
-
-// Delete Records:
-type row interface {
-	User | Role | Address | Phone | UserRoles | UserAddresses | UserPhones | UrXref | UaXref | UpXref
-}
-
-type Record[T row] struct {
-	Id int64
-}
-
-const (
-	DELETE_USER    = "DELETE FROM user WHERE id = ?"
-	DELETE_ROLE    = "DELETE FROM role WHERE id = ?"
-	DELETE_PHONE   = "DELETE FROM phone WHERE id = ?"
-	DELETE_ADDRESS = "DELETE FROM address WHERE id = ?"
-	DELETE_UR      = "DELETE FROM user_role WHERE id = ?"
-	DELETE_UA      = "DELETE FROM user_address WHERE id = ?"
-	DELETE_UP      = "DELETE FROM user_phone WHERE id = ?"
-)
-
-func DeleteRecord[T row](record Record[T], query string) (e error) {
-
-	db := dbConn(AUTH_BACKUP_DB)
-	defer db.Close()
-
-	stmt, err := db.Prepare(query)
-	if err != nil {
-		return err
-	}
-
-	result, err := stmt.Exec(record.Id)
-	if err != nil {
-		return err
-	}
-
-	count, err := result.RowsAffected()
-	if err != nil {
-		return err
-	}
-	if count > 0 {
-		log.Printf("Deletion of %T record %d successful; %d row(s) affected", record, record.Id, count)
-	}
-	return err
 }
