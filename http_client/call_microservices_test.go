@@ -1,10 +1,12 @@
 package http_client
 
 import (
+	"crypto/tls"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
 	"testing"
+	"time"
 )
 
 type health struct {
@@ -14,8 +16,16 @@ type health struct {
 // http refresher
 func TestHttp(t *testing.T) {
 
+	transCfg := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	client := http.Client{
+		Timeout:   5 * time.Second,
+		Transport: transCfg,
+	}
+
 	// get -> health check
-	res, err := http.Get("http://localhost:8080/health")
+	res, err := client.Get("https://deslauriers.world/api/v1/gateway/health")
 	if err != nil {
 		t.Log(err)
 	}
@@ -67,4 +77,12 @@ func TestGetAuthServiceData(t *testing.T) {
 		t.Logf("Expected %s; Actual: %s", "Hoth", users[0].UserAddresses[0].Address.City)
 	}
 
+}
+
+func TestGetImages(t *testing.T) {
+
+	pics, _ := GetGalleryServiceData()
+	for _, v := range pics {
+		t.Log(v.Filename)
+	}
 }

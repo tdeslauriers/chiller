@@ -13,7 +13,7 @@ func BackupAuthService() {
 	// get user data from users service
 	users, err := http_client.GetAuthServiceData()
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 	urs, rs := reconstructRoleTables(users)
 	uas, as := reconstructAddressTables(users)
