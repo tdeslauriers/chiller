@@ -201,7 +201,7 @@ func UpdateUser(user User) (err error) {
 
 	db.Close()
 	if count > 0 {
-		log.Printf("Updated user record %d in the backup auth database.)", user.Id)
+		log.Printf("Updated user record %d in the backup auth database.", user.Id)
 	}
 	return err
 }
