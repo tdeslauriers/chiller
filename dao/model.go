@@ -14,6 +14,7 @@ type User struct {
 	AccountExpired bool            `json:"accountExpired"`
 	AccountLocked  bool            `json:"accountLocked"`
 	Birthday       string          `json:"birthday"`
+	Uuid           string          `json:"uuid"`
 	UserRoles      []UserRoles     `json:"userRoles"`
 	UserAddresses  []UserAddresses `json:"userAddresses"`
 	UserPhones     []UserPhones    `json:"userPhones"`

@@ -136,7 +136,7 @@ func InsertUser(user User) (err error) {
 	db := dbConn(AUTH_BACKUP_DB)
 	defer db.Close()
 
-	query := "INSERT INTO user (id, username, password, firstname, lastname, date_created, enabled, account_expired, account_locked, birthday) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
+	query := "INSERT INTO user (id, username, password, firstname, lastname, date_created, enabled, account_expired, account_locked, birthday, uuid) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
 	stmt, err := db.Prepare(query)
 	if err != nil {
 		return err
@@ -152,7 +152,8 @@ func InsertUser(user User) (err error) {
 		user.Enabled,
 		user.AccountExpired,
 		user.AccountLocked,
-		birthdayNullString(user.Birthday))
+		birthdayNullString(user.Birthday),
+		user.Uuid)
 	if err != nil {
 		return err
 	}
@@ -173,7 +174,7 @@ func UpdateUser(user User) (err error) {
 	db := dbConn(AUTH_BACKUP_DB)
 	defer db.Close()
 
-	query := "UPDATE user SET username = ?, password = ?, firstname = ?, lastname = ?, date_created = ?, enabled = ?, account_expired = ?, account_locked = ?, birthday = ? WHERE id = ?"
+	query := "UPDATE user SET username = ?, password = ?, firstname = ?, lastname = ?, date_created = ?, enabled = ?, account_expired = ?, account_locked = ?, birthday = ?, uuid = ? WHERE id = ?"
 	stmt, err := db.Prepare(query)
 	if err != nil {
 		return err
@@ -189,6 +190,7 @@ func UpdateUser(user User) (err error) {
 		user.AccountExpired,
 		user.AccountLocked,
 		birthdayNullString(user.Birthday),
+		user.Uuid,
 		user.Id)
 	if err != nil {
 		return err
@@ -211,7 +213,7 @@ func FindAllUsers() (users []User, e error) {
 	db := dbConn(AUTH_BACKUP_DB)
 	defer db.Close()
 
-	query := "SELECT id, username, password, firstname, lastname, date_created, enabled, account_expired, account_locked, COALESCE(birthday, '') FROM user"
+	query := "SELECT id, username, password, firstname, lastname, date_created, enabled, account_expired, account_locked, COALESCE(birthday, ''), uuid FROM user"
 	rs, err := db.Query(query)
 	if err != nil {
 		return nil, err
@@ -231,6 +233,7 @@ func FindAllUsers() (users []User, e error) {
 			&user.AccountExpired,
 			&user.AccountLocked,
 			&user.Birthday,
+			&user.Uuid,
 		)
 		if err != nil {
 			log.Fatal(err)

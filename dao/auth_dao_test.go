@@ -17,6 +17,7 @@ var u User = User{
 	AccountExpired: false,
 	AccountLocked:  false,
 	Birthday:       "",
+	Uuid:           "fbd6141b-5c6f-454c-88de-3e9b01b553df",
 }
 
 func TestInsertUser(t *testing.T) {
