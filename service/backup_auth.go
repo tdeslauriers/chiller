@@ -8,10 +8,10 @@ import (
 	"sync"
 )
 
-func BackupAuthService() {
+func BackupAuthService(bearer http_client.Bearer) {
 
 	// get user data from users service
-	users, err := http_client.GetAuthServiceData()
+	users, err := http_client.GetAuthServiceData(bearer)
 	if err != nil {
 		log.Fatal(err)
 	}

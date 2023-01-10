@@ -17,8 +17,12 @@ Because the site is hosted on broken computers, and more importantly, because I 
     1. It would be easier to call the tables one at a time, but I am doing giant nested json for two reasons:
         1. Learning exercise for navigating json w/ Go.
         1. Ultimately, I will move to asyncronus pub/sub, and thats how the data will be. 
-1. Loads into back up database outside K8s cluster.
+1. Loads into backup database outside K8s cluster.
     * field level encryption will be applied by the called services.
+
+### Notes: 
+
+* gallery service needs different approach than other services because of massive size of data.
 
 ## Day Two
 

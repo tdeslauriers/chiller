@@ -11,7 +11,8 @@ import (
 
 func TestBackupAuthService(t *testing.T) {
 
-	BackupAuthService()
+	bearer, _ := http_client.GetBearerToken()
+	BackupAuthService(bearer)
 }
 
 // func TestReconileRoles(t *testing.T) {
@@ -92,7 +93,8 @@ func (a animal[T]) says(sound string) {
 
 func TestReconstructRoleTables(t *testing.T) {
 
-	users, err := http_client.GetAuthServiceData()
+	bearer, _ := http_client.GetBearerToken()
+	users, err := http_client.GetAuthServiceData(bearer)
 	if err != nil {
 		panic(err)
 	}

@@ -10,7 +10,7 @@ func InsertImage(image Image) (err error) {
 	db := dbConn(GALLERY_BACKUP_DB)
 	defer db.Close()
 
-	query := "INSERT INTO image (id, filename, title, description, date, published, thumbnail, image) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+	query := "INSERT INTO image (id, filename, title, description, date, published, thumbnail, presentation, image) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
 	stmt, err := db.Prepare(query)
 	if err != nil {
 		return err
@@ -24,6 +24,7 @@ func InsertImage(image Image) (err error) {
 		image.Date,
 		image.Published,
 		image.Thumbnail,
+		image.Presentation,
 		image.Image)
 	if err != nil {
 		return err

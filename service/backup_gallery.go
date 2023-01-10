@@ -1,10 +1,19 @@
 package service
 
+import (
+	"chiller/http_client"
+	"log"
+)
+
 func backupGalleryService() {
 
-	// get gallery datea from gallery service
-	// images, err := http_client.GetGalleryServiceData()
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
+	ids, err := http_client.GetGalleryImageIds()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// call images one by one.
+	for _, v := range ids {
+
+	}
 }

@@ -49,15 +49,16 @@ func TestGetBearerToken(t *testing.T) {
 
 	t.Logf("username: %s", username)
 
-	bearer, _ := getBearerToken()
+	bearer, _ := GetBearerToken()
 	t.Log(bearer.Access_token)
 	t.Log(bearer.Roles)
 }
 
 func TestGetAuthServiceData(t *testing.T) {
 
+	auth, _ := GetBearerToken()
 	// Testing against known data set
-	users, _ := GetAuthServiceData()
+	users, _ := GetAuthServiceData(auth)
 	for _, v := range users {
 		t.Log(v)
 	}
@@ -79,10 +80,12 @@ func TestGetAuthServiceData(t *testing.T) {
 
 }
 
-func TestGetImages(t *testing.T) {
+func TestGetImageIds(t *testing.T) {
 
-	pics, _ := GetGalleryServiceData()
-	for _, v := range pics {
-		t.Log(v.Filename)
+	auth, _ := GetBearerToken()
+
+	gids, _ := GetGalleryImageIds(auth)
+	for _, v := range gids {
+		t.Log(v)
 	}
 }

@@ -6,7 +6,7 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 )
@@ -24,7 +24,7 @@ type creds struct {
 	Password string `json:"password"`
 }
 
-type bearer struct {
+type Bearer struct {
 	Username     string   `json:"username"`
 	Roles        []string `json:"roles"`
 	Access_token string   `json:"access_token"`
@@ -39,7 +39,7 @@ var client http.Client = http.Client{
 	Transport: transCfg,
 }
 
-func getBearerToken() (brr bearer, e error) {
+func GetBearerToken() (brr Bearer, e error) {
 
 	login := creds{
 		Username: username,
@@ -56,8 +56,8 @@ func getBearerToken() (brr bearer, e error) {
 
 	if res.StatusCode == http.StatusOK {
 
-		b := bearer{}
-		body, err := ioutil.ReadAll(res.Body)
+		b := Bearer{}
+		body, err := io.ReadAll(res.Body)
 		if err != nil {
 			e = err
 		}
@@ -72,13 +72,9 @@ func getBearerToken() (brr bearer, e error) {
 	return brr, e
 }
 
-func GetAuthServiceData() (u []dao.User, e error) {
+func GetAuthServiceData(t Bearer) (u []dao.User, e error) {
 
-	auth, err := getBearerToken()
-	if err != nil {
-		e = err
-	}
-	bearer := fmt.Sprintf("Bearer %s", auth.Access_token)
+	bearer := fmt.Sprintf("Bearer %s", t.Access_token)
 
 	req, err := http.NewRequest("GET", backup_auth_url, nil)
 	if err != nil {
@@ -92,7 +88,7 @@ func GetAuthServiceData() (u []dao.User, e error) {
 	}
 	defer res.Body.Close()
 
-	body, err := ioutil.ReadAll(res.Body)
+	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		e = err
 	}
@@ -103,15 +99,11 @@ func GetAuthServiceData() (u []dao.User, e error) {
 	return users, e
 }
 
-func GetGalleryServiceData() (g []dao.Image, e error) {
+func GetGalleryImageIds(t Bearer) (gids []int64, e error) {
 
-	auth, err := getBearerToken()
-	if err != nil {
-		e = err
-	}
-	bearer := fmt.Sprintf("Bearer %s", auth.Access_token)
+	bearer := fmt.Sprintf("Bearer %s", t.Access_token)
 
-	req, err := http.NewRequest("GET", backup_gallery_url, nil)
+	req, err := http.NewRequest("GET", backup_gallery_url+"/list", nil)
 	if err != nil {
 		e = err
 	}
@@ -123,13 +115,16 @@ func GetGalleryServiceData() (g []dao.Image, e error) {
 	}
 	defer res.Body.Close()
 
-	body, err := ioutil.ReadAll(res.Body)
+	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		e = err
 	}
 
-	var images []dao.Image
-	_ = json.Unmarshal(body, &images)
+	_ = json.Unmarshal(body, &gids)
 
-	return images, e
+	return gids, e
 }
+
+// func GetGalleryImage(id int) (image dao.Image, e error)  {
+
+// }

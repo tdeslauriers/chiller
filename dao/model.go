@@ -76,15 +76,16 @@ type Phone struct {
 
 // gallery persistence objects
 type Image struct {
-	Id          int64         `json:"id"`
-	Filename    string        `json:"filename"`
-	Title       string        `json:"title"`
-	Description string        `json:"description"`
-	Date        string        `json:"date"`
-	Published   bool          `json:"published"`
-	Thumbnail   string        `json:"thumbnail"`
-	Image       string        `json:"image"`
-	AlbumImages []AlbumImages `json:"albumImages"`
+	Id           int64         `json:"id"`
+	Filename     string        `json:"filename"`
+	Title        string        `json:"title"`
+	Description  string        `json:"description"`
+	Date         string        `json:"date"`
+	Published    bool          `json:"published"`
+	Thumbnail    string        `json:"thumbnail"`
+	Presentation string        `json:"presentation"`
+	Image        string        `json:"image"`
+	AlbumImages  []AlbumImages `json:"albumImages"`
 }
 
 type Album struct {
@@ -95,4 +96,10 @@ type Album struct {
 type AlbumImages struct {
 	Id    int64 `json:"id"`
 	Album Album `json:"album"`
+}
+
+type AiXref struct {
+	Id       int64
+	Album_id int64
+	Image_id int64
 }
