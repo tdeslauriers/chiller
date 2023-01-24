@@ -41,6 +41,33 @@ func InsertImage(image Image) (err error) {
 	return err
 }
 
+func InsertAlbum(a Album) (err error) {
+
+	db := dbConn(GALLERY_BACKUP_DB)
+	defer db.Close()
+
+	query := "INSERT INTO album (id, album) VALUES (?, ?)"
+	stmt, err := db.Prepare(query)
+	if err != nil {
+		return err
+	}
+
+	r, err := stmt.Exec(a.Id, a.Album)
+	if err != nil {
+		return err
+	}
+
+	id, err := r.LastInsertId()
+	if err != nil {
+		return err
+	}
+
+	db.Close()
+
+	log.Printf("Album record %d inserted into backup gallery database.", id)
+	return err
+}
+
 func UpdateImage(image Image) (err error) {
 
 	db := dbConn(GALLERY_BACKUP_DB)
@@ -62,7 +89,61 @@ func UpdateImage(image Image) (err error) {
 
 	db.Close()
 	if count > 0 {
-		log.Printf("Updated image record %d in the backup image database.", image.Id)
+		log.Printf("Updated image record %d in the backup gallery database.", image.Id)
 	}
+	return err
+}
+
+func UpdateAlbum(a Album) (err error) {
+
+	db := dbConn(GALLERY_BACKUP_DB)
+	defer db.Close()
+
+	query := "UPDATE album SET album = ? WHERE id = ?"
+	stmt, err := db.Prepare(query)
+	if err != nil {
+		return err
+	}
+
+	r, err := stmt.Exec(a.Album, a.Id)
+
+	count, err := r.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	db.Close()
+	if count > 0 {
+		log.Printf("Updated album record %d in the backup gallery database.", a.Id)
+	}
+	return err
+}
+
+func InsertGalleryXrefRecord[T row](r XrefRecord[T], query string) (err error) {
+
+	db := dbConn(GALLERY_BACKUP_DB)
+	defer db.Close()
+
+	stmt, err := db.Prepare(query)
+	if err != nil {
+		return err
+	}
+
+	result, err := stmt.Exec(
+		r.Id,
+		r.Fk_1,
+		r.Fk_2)
+	if err != nil {
+		return err
+	}
+
+	id, err := result.LastInsertId()
+	if err != nil {
+		return err
+	}
+
+	db.Close()
+
+	log.Printf("%T xref record %d inserted into backup gallery database.", r, id)
 	return err
 }

@@ -18,8 +18,10 @@ func birthdayNullString(bd string) sql.NullString {
 	}
 }
 
+// generics
+
 type row interface {
-	User | Role | Address | Phone | UserRoles | UserAddresses | UserPhones | UrXref | UaXref | UpXref
+	User | Role | Address | Phone | Image | UserRoles | UserAddresses | UserPhones | AlbumImages | UrXref | UaXref | UpXref | AiXref
 }
 
 type Record[T row] struct {
@@ -37,6 +39,7 @@ const (
 	INSERT_UR  = "INSERT INTO user_role (id, user_id, role_id) VALUES (?, ?, ?);"
 	INSERT_UA  = "INSERT INTO user_address (id, user_id, address_id) VALUES (?, ?, ?);"
 	INSERT_UP  = "INSERT INTO user_phone (id, user_id, phone_id) VALUES (?, ?, ?);"
+	INSERT_AI  = "INSERT INTO album_image (id, album_id, image_id) VALUES (?, ?, ?);"
 	FINDALL_UR = "SELECT id, user_id, role_id FROM user_role"
 	FINDALL_UA = "SELECT id, user_id, address_id FROM user_address"
 	FINDALL_UP = "SELECT id, user_id, phone_id FROM user_phone"

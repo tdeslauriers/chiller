@@ -84,8 +84,21 @@ func TestGetImageIds(t *testing.T) {
 
 	auth, _ := GetBearerToken()
 
-	gids, _ := GetGalleryImageIds(auth)
-	for _, v := range gids {
-		t.Log(v)
+	ids, err := GetGalleryImageIds(auth)
+	if err != nil {
+		t.Log(err)
 	}
+
+	t.Log(ids)
+}
+
+func TestGetImage(t *testing.T) {
+
+	auth, _ := GetBearerToken()
+	ids, _ := GetGalleryImageIds(auth)
+	for _, v := range ids {
+		img, _ := GetGalleryImage(v, auth)
+		t.Logf("%d - %s - %s: %s", img.Id, img.Title, img.Filename, img.Description)
+	}
+
 }

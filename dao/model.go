@@ -96,6 +96,7 @@ type Album struct {
 type AlbumImages struct {
 	Id    int64 `json:"id"`
 	Album Album `json:"album"`
+	Image Image
 }
 
 type AiXref struct {
@@ -103,3 +104,5 @@ type AiXref struct {
 	Album_id int64
 	Image_id int64
 }
+
+

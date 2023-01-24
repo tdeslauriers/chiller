@@ -16,4 +16,5 @@ func main() {
 	}
 
 	service.BackupAuthService(auth)
+	service.BackupGalleryService(auth)
 }

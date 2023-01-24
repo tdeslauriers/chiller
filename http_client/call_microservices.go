@@ -9,6 +9,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"time"
 )
 
 var (
@@ -37,6 +38,7 @@ var transCfg *http.Transport = &http.Transport{
 }
 var client http.Client = http.Client{
 	Transport: transCfg,
+	Timeout:   180 * time.Second,
 }
 
 func GetBearerToken() (brr Bearer, e error) {
@@ -125,6 +127,29 @@ func GetGalleryImageIds(t Bearer) (gids []int64, e error) {
 	return gids, e
 }
 
-// func GetGalleryImage(id int) (image dao.Image, e error)  {
+func GetGalleryImage(id int64, t Bearer) (image dao.Image, e error) {
 
-// }
+	bearer := fmt.Sprintf("Bearer %s", t.Access_token)
+
+	req, err := http.NewRequest("GET", fmt.Sprintf("%s/%d", backup_gallery_url, id), nil)
+	if err != nil {
+		e = err
+	}
+	req.Header.Add("Authorization", bearer)
+
+	res, err := client.Do(req)
+	if err != nil {
+		return image, err
+	}
+	defer res.Body.Close()
+
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		e = err
+	}
+
+	_ = json.Unmarshal(body, &image)
+
+	return image, e
+
+}
