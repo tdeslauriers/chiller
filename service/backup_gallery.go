@@ -62,9 +62,7 @@ func BackupGalleryService(token http_client.Bearer) {
 			}
 
 			xref := dao.XrefRecord[dao.AiXref]{Id: ai.Id, Fk_1: ai.Album.Id, Fk_2: ai.Image.Id}
-			if err := dao.InsertGalleryXrefRecord(xref, dao.INSERT_AI); err != nil {
-				log.Print(err)
-			}
+			dao.InsertGalleryXrefRecord(xref, dao.INSERT_AI) // dump insert errors
 		}(ai)
 	}
 

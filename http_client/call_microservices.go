@@ -136,6 +136,7 @@ func GetGalleryImage(id int64, t Bearer) (image dao.Image, e error) {
 		e = err
 	}
 	req.Header.Add("Authorization", bearer)
+	req.Close = true
 
 	res, err := client.Do(req)
 	if err != nil {

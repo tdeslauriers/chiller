@@ -82,9 +82,9 @@ type Image struct {
 	Description  string        `json:"description"`
 	Date         string        `json:"date"`
 	Published    bool          `json:"published"`
-	Thumbnail    string        `json:"thumbnail"`
-	Presentation string        `json:"presentation"`
-	Image        string        `json:"image"`
+	Thumbnail    []byte        `json:"thumbnail"`
+	Presentation []byte        `json:"presentation"`
+	Image        []byte        `json:"image"`
 	AlbumImages  []AlbumImages `json:"albumImages"`
 }
 
@@ -104,5 +104,3 @@ type AiXref struct {
 	Album_id int64
 	Image_id int64
 }
-
-
