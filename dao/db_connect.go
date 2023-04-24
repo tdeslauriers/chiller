@@ -14,6 +14,12 @@ var (
 	// need to pass in db name on creation for different dbs
 )
 
+const (
+	BACKUP_AUTH      = "backup_auth"
+	BACKUP_GALLERY   = "backup_gallery"
+	BACKUP_ALLOWANCE = "backup_allowance"
+)
+
 // DBConn is db connector function
 func dbConn(name string) *sql.DB {
 

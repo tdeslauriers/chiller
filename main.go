@@ -14,9 +14,8 @@ func main() {
 	if err != nil {
 		log.Panic(err)
 	}
-
+	log.Println(auth.Username)
 	service.BackupAuthService(auth)
 	service.BackupGalleryService(auth)
 }
 
-// test run

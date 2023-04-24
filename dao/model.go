@@ -104,3 +104,38 @@ type AiXref struct {
 	Album_id int64
 	Image_id int64
 }
+
+// allowance persistence objects
+type Allowance struct {
+	Id        int64  `json:"userId"`
+	Balance   string `json:"balance"`
+	User_Uuid string `json:"userUuid"`
+}
+
+type Task struct {
+	Id           int64  `json:"id"`
+	Date         string `json:"date"`
+	Complete     string `json:"complete"`
+	Satisfactory string `json:"satisfactory"`
+	TasktypeId   string `json:"tasktypeId"`
+}
+
+type TaskAllowance struct {
+	Id          int64  `json:"id"`
+	TaskId      string `json:"taskId"`
+	AllowanceId string `json:"allowanceId"`
+}
+
+type Tasktype struct {
+	Id       int64  `json:"id"`
+	Name     string `json:"name"`
+	Cadence  string `json:"cadence"`
+	Category string `json:"category"`
+	Archived string `json:"archived"`
+}
+
+type TasktypeAllowance struct {
+	Id          int64  `json:"id"`
+	TasktypeId  string `json:"taskId"`
+	AllowanceId string `json:"allowanceId"`
+}

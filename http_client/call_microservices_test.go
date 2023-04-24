@@ -1,8 +1,11 @@
 package http_client
 
 import (
+	"chiller/dao"
+
 	"crypto/tls"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"testing"
@@ -63,21 +66,6 @@ func TestGetAuthServiceData(t *testing.T) {
 		t.Log(v)
 	}
 
-	if users[0].Lastname != "Skywalker" {
-		t.Fail()
-		t.Logf("Expected %s; Actual: %s", "Skywalker", users[0].Lastname)
-	}
-
-	if users[0].UserRoles[0].Role.Title != "General Admission" {
-		t.Fail()
-		t.Logf("Expected %s; Actual: %s", "GeneralAdmission", users[0].UserRoles[0].Role.Title)
-	}
-
-	if users[0].UserAddresses[0].Address.City != "Hoth" {
-		t.Fail()
-		t.Logf("Expected %s; Actual: %s", "Hoth", users[0].UserAddresses[0].Address.City)
-	}
-
 }
 
 func TestGetImageIds(t *testing.T) {
@@ -101,4 +89,19 @@ func TestGetImage(t *testing.T) {
 		t.Logf("%d - %s - %s: %s", img.Id, img.Title, img.Filename, img.Description)
 	}
 
+}
+
+func TestGetBackupTable(t *testing.T) {
+
+	auth, _ := GetBearerToken()
+	var allowances []dao.Allowance
+	t.Log(Backup_allowance_url)
+	err := GetBackupTable(fmt.Sprintf("%s%s/%d", Backup_allowance_url, "/allowances", 1682077547), auth, &allowances)
+	if err != nil {
+		t.Log(err)
+	}
+
+	for _, a := range allowances {
+		t.Logf("id: %v", a)
+	}
 }

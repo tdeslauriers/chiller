@@ -13,11 +13,12 @@ import (
 )
 
 var (
-	username           = os.Getenv("CHILLER_LOGIN_USERNAME")
-	password           = os.Getenv("CHILLER_LOGIN_PASSWORD")
-	auth_url           = os.Getenv("CHILLER_AUTH_URL")
-	backup_auth_url    = os.Getenv("CHILLER_BACKUP_AUTH_URL")
-	backup_gallery_url = os.Getenv("CHILLER_BACKUP_GALLERY_URL")
+	username             = os.Getenv("CHILLER_LOGIN_USERNAME")
+	password             = os.Getenv("CHILLER_LOGIN_PASSWORD")
+	auth_url             = os.Getenv("CHILLER_AUTH_URL")
+	backup_auth_url      = os.Getenv("CHILLER_BACKUP_AUTH_URL")
+	backup_gallery_url   = os.Getenv("CHILLER_BACKUP_GALLERY_URL")
+	Backup_allowance_url = os.Getenv("CHILLER_BACKUP_ALLOWANCE_URL")
 )
 
 type creds struct {
@@ -153,4 +154,29 @@ func GetGalleryImage(id int64, t Bearer) (image dao.Image, e error) {
 
 	return image, e
 
+}
+
+func GetBackupTable(endpoint string, t Bearer, v interface{}) error {
+
+	bearer := fmt.Sprintf("Bearer %s", t.Access_token)
+
+	req, err := http.NewRequest("GET", endpoint, nil)
+	if err != nil {
+		return err
+	}
+	req.Header.Add("Authorization", bearer)
+	req.Close = true
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	err = json.NewDecoder(resp.Body).Decode(v)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

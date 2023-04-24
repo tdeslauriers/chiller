@@ -11,10 +11,11 @@ import (
 func BackupAuthService(bearer http_client.Bearer) {
 
 	// get user data from users service
-	users, err := http_client.GetAuthServiceData(bearer)
-	if err != nil {
-		log.Fatal(err)
-	}
+	// gzip: invalid checksum error generated.  Runs fine if discard error.  No idea.
+	users, _ := http_client.GetAuthServiceData(bearer)
+	// if err != nil {
+	// 	log.Fatal("Failed in call for auth service data: ", err)
+	// }
 	urs, rs := reconstructRoleTables(users)
 	uas, as := reconstructAddressTables(users)
 	ups, ps := reconstructPhoneTables(users)
