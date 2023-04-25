@@ -6,12 +6,27 @@ import (
 	"strings"
 )
 
-func InsertRecord(uri string, table string, cols []string, values ...interface{}) error {
+func InsertRecord(uri string, table string, insert interface{}) error {
 
 	db := dbConn(uri)
 	defer db.Close()
 
-	query := fmt.Sprintf("INSERT INTO %s (%s) VALUES (%s)", table, strings.Join(cols, ", "), strings.Repeat("?, ", len(values))[0:len(values)*3-2])
+	// build query
+	query := fmt.Sprintf("INSERT INTO %s (", table)
+
+	inserts := structToMap(insert)
+	keys := make([]string, len(inserts))
+	values := make([]interface{}, len(inserts))
+	i := 0
+	for k, v := range inserts {
+		keys[i] = k
+		values[i] = v
+		i++
+	}
+
+	query += strings.Join(keys, ", ")
+	query += fmt.Sprintf(") VALUES (%s)", strings.Repeat("?, ", len(keys))[0:len(keys)*3-2])
+
 	stmt, err := db.Prepare(query)
 	if err != nil {
 		return err
@@ -38,15 +53,17 @@ func UpdateRecord(uri string, table string, update interface{}) error {
 	id := updates["Id"]
 	delete(updates, "Id") // remove id since it is not being updated.
 
-	fields := make([]string, len(updates))
+	keys := make([]string, len(updates))
+	values := make([]interface{}, len(keys)+1) // +1 for the id, later
 	i := 0
-	for k, _ := range updates {
-		fields[i] = fmt.Sprintf("%s = ?", k)
+	for k, v := range updates {
+		keys[i] = fmt.Sprintf("%s = ?", k)
+		values[i] = v
 		i++
 	}
 
-	query += strings.Join(fields, ", ")
-	query += fmt.Sprintln(" WHERE id = ?")
+	query += strings.Join(keys, ", ")
+	query += " WHERE id = ?"
 
 	stmt, err := db.Prepare(query)
 	if err != nil {
@@ -54,13 +71,8 @@ func UpdateRecord(uri string, table string, update interface{}) error {
 	}
 	defer stmt.Close()
 
-	values := make([]interface{}, len(fields)+1)
-	i = 0
-	for _, v := range updates {
-		values[i] = v
-		i++
-	}
-	values[len(fields)] = id // index offset by one so dont need + 1
+	// adding Id value to the end for 'WHERE id = ?'
+	values[len(keys)] = id // index offset by one so dont need + 1
 
 	_, err = stmt.Exec(values...)
 	if err != nil {

@@ -16,8 +16,8 @@ var (
 	username             = os.Getenv("CHILLER_LOGIN_USERNAME")
 	password             = os.Getenv("CHILLER_LOGIN_PASSWORD")
 	auth_url             = os.Getenv("CHILLER_AUTH_URL")
-	backup_auth_url      = os.Getenv("CHILLER_BACKUP_AUTH_URL")
-	backup_gallery_url   = os.Getenv("CHILLER_BACKUP_GALLERY_URL")
+	Backup_auth_url      = os.Getenv("CHILLER_BACKUP_AUTH_URL")
+	Backup_gallery_url   = os.Getenv("CHILLER_BACKUP_GALLERY_URL")
 	Backup_allowance_url = os.Getenv("CHILLER_BACKUP_ALLOWANCE_URL")
 )
 
@@ -79,7 +79,7 @@ func GetAuthServiceData(t Bearer) (u []dao.User, e error) {
 
 	bearer := fmt.Sprintf("Bearer %s", t.Access_token)
 
-	req, err := http.NewRequest("GET", backup_auth_url, nil)
+	req, err := http.NewRequest("GET", Backup_auth_url, nil)
 	if err != nil {
 		e = err
 	}
@@ -106,7 +106,7 @@ func GetGalleryImageIds(t Bearer) (gids []int64, e error) {
 
 	bearer := fmt.Sprintf("Bearer %s", t.Access_token)
 
-	req, err := http.NewRequest("GET", backup_gallery_url+"/list", nil)
+	req, err := http.NewRequest("GET", Backup_gallery_url+"/list", nil)
 	if err != nil {
 		e = err
 	}
@@ -132,7 +132,7 @@ func GetGalleryImage(id int64, t Bearer) (image dao.Image, e error) {
 
 	bearer := fmt.Sprintf("Bearer %s", t.Access_token)
 
-	req, err := http.NewRequest("GET", fmt.Sprintf("%s/%d", backup_gallery_url, id), nil)
+	req, err := http.NewRequest("GET", fmt.Sprintf("%s/%d", Backup_gallery_url, id), nil)
 	if err != nil {
 		e = err
 	}
