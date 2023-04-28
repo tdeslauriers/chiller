@@ -39,7 +39,7 @@ var transCfg *http.Transport = &http.Transport{
 }
 var client http.Client = http.Client{
 	Transport: transCfg,
-	Timeout:   180 * time.Second,
+	Timeout:   600 * time.Second,
 }
 
 func GetBearerToken() (brr Bearer, e error) {
@@ -156,7 +156,7 @@ func GetGalleryImage(id int64, t Bearer) (image dao.Image, e error) {
 
 }
 
-func GetBackupTable(endpoint string, t Bearer, v interface{}) error {
+func GetAppTable(endpoint string, t Bearer, v interface{}) error {
 
 	bearer := fmt.Sprintf("Bearer %s", t.Access_token)
 

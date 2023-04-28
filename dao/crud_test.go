@@ -27,3 +27,22 @@ func TestUpdateRecord(t *testing.T) {
 	}
 
 }
+
+func TestSelectRecords(t *testing.T) {
+
+	var records []Backup
+	p := " order by backup desc limit 1"
+	err := SelectRecords(BACKUP_ALLOWANCE, "backup", p, &records)
+	if err != nil {
+		t.Log(err)
+	}
+	t.Logf("%v", records)
+
+	var allowances []Allowance
+	err = SelectRecords(BACKUP_ALLOWANCE, "allowance", "", &allowances)
+	if err != nil {
+		t.Log(err)
+	}
+	t.Logf("%v", allowances)
+
+}

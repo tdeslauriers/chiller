@@ -96,7 +96,7 @@ func TestGetBackupTable(t *testing.T) {
 	auth, _ := GetBearerToken()
 	var allowances []dao.Allowance
 	t.Log(Backup_allowance_url)
-	err := GetBackupTable(fmt.Sprintf("%s%s/%d", Backup_allowance_url, "/allowances", 1682077547), auth, &allowances)
+	err := GetAppTable(fmt.Sprintf("%s%s/%d", Backup_allowance_url, "/allowances", 1682077547), auth, &allowances)
 	if err != nil {
 		t.Log(err)
 	}

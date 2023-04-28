@@ -1,5 +1,12 @@
 package dao
 
+import "time"
+
+type Backup struct {
+	Id     int64     `db:"id"`
+	Backup time.Time `db:"backup"`
+}
+
 // nested structs have been pulled appart for re-use
 
 // auth persistance objects
@@ -107,35 +114,35 @@ type AiXref struct {
 
 // allowance persistence objects
 type Allowance struct {
-	Id        int64  `json:"userId"`
-	Balance   string `json:"balance"`
-	User_Uuid string `json:"userUuid"`
+	Id        int64  `json:"userId" db:"id"`
+	Balance   string `json:"balance" db:"balance"`
+	User_Uuid string `json:"userUuid" db:"user_uuid"`
 }
 
 type Task struct {
-	Id           int64  `json:"id"`
-	Date         string `json:"date"`
-	Complete     string `json:"complete"`
-	Satisfactory string `json:"satisfactory"`
-	TasktypeId   string `json:"tasktypeId"`
+	Id           int64  `json:"id" db:"id"`
+	Date         string `json:"date" db:"date"`
+	Complete     string `json:"complete" db:"complete"`
+	Satisfactory string `json:"satisfactory" db:"satisfactory"`
+	TasktypeId   string `json:"tasktypeId" db:"tasktype_id"`
 }
 
 type TaskAllowance struct {
-	Id          int64  `json:"id"`
-	TaskId      string `json:"taskId"`
-	AllowanceId string `json:"allowanceId"`
+	Id          int64  `json:"id" db:"id"`
+	TaskId      string `json:"taskId" db:"task_id"`
+	AllowanceId string `json:"allowanceId" db:"allowance_id"`
 }
 
 type Tasktype struct {
-	Id       int64  `json:"id"`
-	Name     string `json:"name"`
-	Cadence  string `json:"cadence"`
-	Category string `json:"category"`
-	Archived string `json:"archived"`
+	Id       int64  `json:"id" db:"id"`
+	Name     string `json:"name" db:"name"`
+	Cadence  string `json:"cadence" db:"cadence"`
+	Category string `json:"category" db:"category"`
+	Archived string `json:"archived" db"archived"`
 }
 
 type TasktypeAllowance struct {
-	Id          int64  `json:"id"`
-	TasktypeId  string `json:"taskId"`
-	AllowanceId string `json:"allowanceId"`
+	Id          int64  `json:"id" db:"id"`
+	TasktypeId  string `json:"taskId" db:"tasktype_id"`
+	AllowanceId string `json:"allowanceId" db:"allowance_id"`
 }
