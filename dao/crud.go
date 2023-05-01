@@ -137,7 +137,7 @@ func structToMap(s interface{}) map[string]interface{} {
 	v := reflect.ValueOf(s)
 	t := v.Type()
 	for i := 0; i < v.NumField(); i++ {
-		result[t.Field(i).Name] = v.Field(i).Interface()
+		result[t.Field(i).Tag.Get("db")] = v.Field(i).Interface()
 	}
 
 	return result

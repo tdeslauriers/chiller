@@ -114,9 +114,9 @@ type AiXref struct {
 
 // allowance persistence objects
 type Allowance struct {
-	Id        int64  `json:"userId" db:"id"`
-	Balance   string `json:"balance" db:"balance"`
-	User_Uuid string `json:"userUuid" db:"user_uuid"`
+	Id       int64  `json:"userId" db:"id"`
+	Balance  string `json:"balance" db:"balance"`
+	UserUuid string `json:"userUuid" db:"user_uuid"`
 }
 
 type Task struct {
@@ -138,11 +138,11 @@ type Tasktype struct {
 	Name     string `json:"name" db:"name"`
 	Cadence  string `json:"cadence" db:"cadence"`
 	Category string `json:"category" db:"category"`
-	Archived string `json:"archived" db"archived"`
+	Archived string `json:"archived" db:"archived"`
 }
 
 type TasktypeAllowance struct {
 	Id          int64  `json:"id" db:"id"`
-	TasktypeId  string `json:"taskId" db:"tasktype_id"`
+	TasktypeId  string `json:"tasktypeId" db:"tasktype_id"`
 	AllowanceId string `json:"allowanceId" db:"allowance_id"`
 }

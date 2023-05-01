@@ -94,14 +94,14 @@ func TestGetImage(t *testing.T) {
 func TestGetBackupTable(t *testing.T) {
 
 	auth, _ := GetBearerToken()
-	var allowances []dao.Allowance
+	var records []dao.TaskAllowance
 	t.Log(Backup_allowance_url)
-	err := GetAppTable(fmt.Sprintf("%s%s/%d", Backup_allowance_url, "/allowances", 1682077547), auth, &allowances)
+	err := GetAppTable(fmt.Sprintf("%s/%s/%d", Backup_allowance_url, "task_allowances", 1682917200), auth, &records)
 	if err != nil {
 		t.Log(err)
 	}
 
-	for _, a := range allowances {
+	for _, a := range records {
 		t.Logf("id: %v", a)
 	}
 }

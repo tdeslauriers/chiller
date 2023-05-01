@@ -7,6 +7,7 @@ import (
 	"log"
 	"reflect"
 	"sync"
+	"time"
 )
 
 func backupRecord(uri string, table string, record interface{}) error {
@@ -35,9 +36,14 @@ func GetLastBackup() (dao.Backup, error) {
 	return last, nil
 }
 
+func UpdateLastBackup() error {
+
+	return nil
+}
+
 func backupAppTable(url, db, table string, epoch int64, t http_client.Bearer, records interface{}) error {
 
-	endpoint := fmt.Sprintf("%s/%s/%d", url, table, 1672531200) // change to epoch after initial backups
+	endpoint := fmt.Sprintf("%s/%s/%d", url, table, epoch)
 	if err := http_client.GetAppTable(endpoint, t, records); err != nil {
 		return err
 	}
@@ -71,23 +77,35 @@ func backupAppTable(url, db, table string, epoch int64, t http_client.Bearer, re
 func BackupAllowanceService(last dao.Backup, t http_client.Bearer) error {
 
 	var (
-		allowances []dao.Allowance
-		tasktypes  []dao.Tasktype
-		tasks      []dao.Task
-		// tasktype_allowances []dao.TasktypeAllowance
-		// taskAllowances      []dao.TaskAllowance
+		allowances         []dao.Allowance
+		tasktypes          []dao.Tasktype
+		tasktypeAllowances []dao.TasktypeAllowance
+		tasks              []dao.Task
+		taskAllowances     []dao.TaskAllowance
 	)
 
 	if err := backupAppTable(http_client.Backup_allowance_url, dao.BACKUP_ALLOWANCE, "allowances", last.Backup.Unix(), t, &allowances); err != nil {
-
 		return err
 	}
 	if err := backupAppTable(http_client.Backup_allowance_url, dao.BACKUP_ALLOWANCE, "tasktypes", last.Backup.Unix(), t, &tasktypes); err != nil {
 		return err
 	}
+	if err := backupAppTable(http_client.Backup_allowance_url, dao.BACKUP_ALLOWANCE, "tasktype_allowances", last.Backup.Unix(), t, &tasktypeAllowances); err != nil {
+		return err
+	}
 	if err := backupAppTable(http_client.Backup_allowance_url, dao.BACKUP_ALLOWANCE, "tasks", last.Backup.Unix(), t, &tasks); err != nil {
 		return err
 	}
+	if err := backupAppTable(http_client.Backup_allowance_url, dao.BACKUP_ALLOWANCE, "task_allowances", last.Backup.Unix(), t, &taskAllowances); err != nil {
+		return err
+	}
+
+	// insert new 'most-recent' backup date
+	b := dao.Backup{Backup: time.Now()}
+	if err := dao.InsertRecord(dao.BACKUP_ALLOWANCE, "backup", b); err != nil {
+		return err
+	}
+	log.Printf("Backup activities complete for allownace service. Most recent backup date-time: %v", b.Backup)
 
 	return nil
 }

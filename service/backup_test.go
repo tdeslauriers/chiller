@@ -8,7 +8,7 @@ import (
 func TestBackupRecord(t *testing.T) {
 
 	for i := 1; i < 100; i++ {
-		a := dao.Allowance{Id: int64(i), Balance: "BALANCE", User_Uuid: "UUID"}
+		a := dao.Allowance{Id: int64(i), Balance: "BALANCE", UserUuid: "UUID"}
 		err := backupRecord(dao.BACKUP_ALLOWANCE, "allowance", a)
 		if err != nil {
 			t.Log(err)
