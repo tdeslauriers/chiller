@@ -100,6 +100,8 @@ func BackupAllowanceService(last dao.Backup, t http_client.Bearer) error {
 		return err
 	}
 
+	// remove deleted records
+
 	// insert new 'most-recent' backup date
 	b := dao.Backup{Backup: time.Now()}
 	if err := dao.InsertRecord(dao.BACKUP_ALLOWANCE, "backup", b); err != nil {

@@ -146,3 +146,11 @@ type TasktypeAllowance struct {
 	TasktypeId  string `json:"tasktypeId" db:"tasktype_id"`
 	AllowanceId string `json:"allowanceId" db:"allowance_id"`
 }
+
+type CleanupAllowance struct {
+	AllowanceIds         []int64 `json:"allowanceIds"`
+	TasktypeIds          []int64 `json:"tasktypeIds"`
+	TaskIds              []int64 `json:"taskIds"`
+	TasktypeAllowanceIds []int64 `json:"tasktypeAllowanceIds"`
+	TaskAllowanceId      []int64 `json:"taskAllowanceIds"`
+}
