@@ -7,18 +7,22 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"time"
 )
 
 var (
-	username             = os.Getenv("CHILLER_LOGIN_USERNAME")
-	password             = os.Getenv("CHILLER_LOGIN_PASSWORD")
-	auth_url             = os.Getenv("CHILLER_AUTH_URL")
-	Backup_auth_url      = os.Getenv("CHILLER_BACKUP_AUTH_URL")
-	Backup_gallery_url   = os.Getenv("CHILLER_BACKUP_GALLERY_URL")
-	Backup_allowance_url = os.Getenv("CHILLER_BACKUP_ALLOWANCE_URL")
+	username              = os.Getenv("CHILLER_LOGIN_USERNAME")
+	password              = os.Getenv("CHILLER_LOGIN_PASSWORD")
+	auth_url              = os.Getenv("CHILLER_AUTH_URL")
+	Backup_auth_url       = os.Getenv("CHILLER_BACKUP_AUTH_URL")
+	Backup_gallery_url    = os.Getenv("CHILLER_BACKUP_GALLERY_URL")
+	Backup_allowance_url  = os.Getenv("CHILLER_BACKUP_ALLOWANCE_URL")
+	Restore_auth_url      = os.Getenv("CHILLER_RESTORE_AUTH_URL")
+	Restore_gallery_url   = os.Getenv("CHILLER_RESTORE_GALLERY_URL")
+	Restore_allowance_url = os.Getenv("CHILLER_RESTORE_ALLOWANCE_URL")
 )
 
 type creds struct {
@@ -179,4 +183,42 @@ func GetAppTable(endpoint string, t Bearer, v interface{}) error {
 	}
 
 	return nil
+}
+
+func PostRecord(endpoint string, t Bearer, v interface{}) error {
+
+	bearer := fmt.Sprintf("Bearer %s", t.Access_token)
+
+	vToBytes, err := json.Marshal(v)
+	if err != nil {
+		log.Fatalf("Error marshalling JSON: %v", v)
+		return err
+	}
+
+	req, err := http.NewRequest("POST", endpoint, bytes.NewBuffer(vToBytes))
+	if err != nil {
+		return nil
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Add("Authorization", bearer)
+	req.Close = true
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusNoContent {
+		log.Printf("Post successful - %v", resp.StatusCode)
+	} else {
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			log.Fatalf("Error reading error response from call: %v", err)
+		}
+		log.Fatalf("Error in post request: %s", string(body))
+	}
+
+	return nil
+
 }

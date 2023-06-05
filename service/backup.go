@@ -61,7 +61,7 @@ func backupAppTable(url, db, table string, epoch int64, t http_client.Bearer, re
 				defer wgTable.Done()
 
 				if err := backupRecord(db, table, slice.Index(index).Interface()); err != nil {
-					log.Panic("Unable to back up data record.")
+					log.Fatal("Unable to back up data record.")
 				}
 			}(i)
 

@@ -11,17 +11,17 @@ type Backup struct {
 
 // auth persistance objects
 type User struct {
-	Id             int64           `json:"id"`
-	Username       string          `json:"username"`
-	Password       string          `json:"password"`
-	Firstname      string          `json:"firstname"`
-	Lastname       string          `json:"lastname"`
-	DateCreated    string          `json:"dateCreated"`
-	Enabled        bool            `json:"enabled"`
-	AccountExpired bool            `json:"accountExpired"`
-	AccountLocked  bool            `json:"accountLocked"`
-	Birthday       string          `json:"birthday"`
-	Uuid           string          `json:"uuid"`
+	Id             int64           `json:"id" db:"id"`
+	Username       string          `json:"username" db:"username"`
+	Password       string          `json:"password" db:"password"`
+	Firstname      string          `json:"firstname" db:"firstname"`
+	Lastname       string          `json:"lastname" db:"lastname"`
+	DateCreated    string          `json:"dateCreated" db:"date_created"`
+	Enabled        bool            `json:"enabled" db:"enabled"`
+	AccountExpired bool            `json:"accountExpired" db:"account_expired"`
+	AccountLocked  bool            `json:"accountLocked" db:"account_locked"`
+	Birthday       string          `json:"birthday" db:"birthday"`
+	Uuid           string          `json:"uuid" db:"uuid"`
 	UserRoles      []UserRoles     `json:"userRoles"`
 	UserAddresses  []UserAddresses `json:"userAddresses"`
 	UserPhones     []UserPhones    `json:"userPhones"`
