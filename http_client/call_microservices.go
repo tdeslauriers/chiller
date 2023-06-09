@@ -210,13 +210,13 @@ func PostRecord(endpoint string, t Bearer, v interface{}) error {
 	defer resp.Body.Close()
 
 	if resp.StatusCode == http.StatusNoContent {
-		log.Printf("Post successful - %v", resp.StatusCode)
+		log.Printf("Post to %s successful: %v", endpoint, resp.StatusCode)
 	} else {
 		body, err := io.ReadAll(resp.Body)
 		if err != nil {
 			log.Fatalf("Error reading error response from call: %v", err)
 		}
-		log.Fatalf("Error in post request: %s", string(body))
+		log.Printf("Error in post request of %v: %s", v, string(body))
 	}
 
 	return nil

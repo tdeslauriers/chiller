@@ -17,7 +17,7 @@ func restoreAppTable(url, db, table string, t http_client.Bearer, records interf
 
 	slice := reflect.ValueOf(records).Elem()
 	if slice.Len() < 1 {
-		log.Printf("%s table has not records which seems impossible", table)
+		log.Printf("%s table has no records which seems impossible", table)
 	} else {
 
 		var wgTable sync.WaitGroup
@@ -42,9 +42,19 @@ func restoreAppTable(url, db, table string, t http_client.Bearer, records interf
 
 func RestoreAuthService(t http_client.Bearer) error {
 
-	var users []dao.User
+	var (
+		users     []dao.User
+		roles     []dao.Role
+		userRoles []dao.UrXref
+	)
 
 	if err := restoreAppTable(http_client.Restore_auth_url, dao.BACKUP_AUTH, "user", t, &users); err != nil {
+		return err
+	}
+	if err := restoreAppTable(http_client.Restore_auth_url, dao.BACKUP_AUTH, "role", t, &roles); err != nil {
+		return err
+	}
+	if err := restoreAppTable(http_client.Restore_auth_url, dao.BACKUP_AUTH, "user_role", t, &userRoles); err != nil {
 		return err
 	}
 

@@ -11,20 +11,17 @@ type Backup struct {
 
 // auth persistance objects
 type User struct {
-	Id             int64           `json:"id" db:"id"`
-	Username       string          `json:"username" db:"username"`
-	Password       string          `json:"password" db:"password"`
-	Firstname      string          `json:"firstname" db:"firstname"`
-	Lastname       string          `json:"lastname" db:"lastname"`
-	DateCreated    string          `json:"dateCreated" db:"date_created"`
-	Enabled        bool            `json:"enabled" db:"enabled"`
-	AccountExpired bool            `json:"accountExpired" db:"account_expired"`
-	AccountLocked  bool            `json:"accountLocked" db:"account_locked"`
-	Birthday       string          `json:"birthday" db:"birthday"`
-	Uuid           string          `json:"uuid" db:"uuid"`
-	UserRoles      []UserRoles     `json:"userRoles"`
-	UserAddresses  []UserAddresses `json:"userAddresses"`
-	UserPhones     []UserPhones    `json:"userPhones"`
+	Id             int64  `json:"id" db:"id"`
+	Username       string `json:"username" db:"username"`
+	Password       string `json:"password" db:"password"`
+	Firstname      string `json:"firstname" db:"firstname"`
+	Lastname       string `json:"lastname" db:"lastname"`
+	DateCreated    string `json:"dateCreated" db:"date_created"`
+	Enabled        bool   `json:"enabled" db:"enabled"`
+	AccountExpired bool   `json:"accountExpired" db:"account_expired"`
+	AccountLocked  bool   `json:"accountLocked" db:"account_locked"`
+	Uuid           string `json:"uuid" db:"uuid"`
+	Birthday       string `json:"birthday" db:"birthday"`
 }
 
 type UserRoles struct {
@@ -33,16 +30,16 @@ type UserRoles struct {
 }
 
 type UrXref struct {
-	Id      int64
-	User_id int64
-	Role_id int64
+	Id      int64 `json:"id" db:"id"`
+	User_id int64 `json:"userId" db:"user_id"`
+	Role_id int64 `json:"roleId" db:"role_id"`
 }
 
 type Role struct {
-	Id          int64  `json:"id"`
-	Role        string `json:"role"`
-	Title       string `json:"title"`
-	Description string `json:"description"`
+	Id          int64  `json:"id" db:"id"`
+	Role        string `json:"role" db:"role"`
+	Title       string `json:"title" db:"title"`
+	Description string `json:"description" db:"description"`
 }
 
 type UserAddresses struct {

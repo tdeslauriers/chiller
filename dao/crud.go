@@ -2,6 +2,7 @@ package dao
 
 import (
 	"fmt"
+	"log"
 	"reflect"
 	"strings"
 )
@@ -26,6 +27,7 @@ func SelectRecords(uri string, table string, sqlParams string, results interface
 
 	// build query
 	query := fmt.Sprintf("SELECT %s FROM %s", strings.Join(columns, ", "), table)
+	log.Print(query)
 
 	// params (if applicable)
 	if len(sqlParams) > 0 {
@@ -44,9 +46,11 @@ func SelectRecords(uri string, table string, sqlParams string, results interface
 		for i := range scanArgs {
 			scanArgs[i] = result.Field(i).Addr().Interface()
 		}
-		if err := rows.Scan(scanArgs...); err != nil {
-			return err
+		err := rows.Scan(scanArgs...)
+		if err != nil {
+			log.Print(err)
 		}
+
 		v.Elem().Set(reflect.Append(v.Elem(), result))
 
 	}
