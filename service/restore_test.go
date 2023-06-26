@@ -13,3 +13,11 @@ func TestRestoreAuthService(t *testing.T) {
 	t.Logf("Restored Auth User Service Data: %v", err)
 
 }
+
+func TestRestoreAllowanceService(t *testing.T) {
+
+	auth, _ := http_client.GetBearerToken()
+
+	err := RestoreAllowanceService(auth)
+	t.Logf("Restored Auth User Service Data: %v", err)
+}

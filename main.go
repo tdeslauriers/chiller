@@ -15,10 +15,11 @@ func main() {
 		log.Fatal(err)
 	}
 
-
 	// service.BackupAuthService(auth)
 	// service.BackupGalleryService(auth)
 
-	service.RestoreAuthService(auth)
+	// service.RestoreAuthService(auth)
+	// service.RestoreAllowanceService(auth)
+	service.RestoreGalleryService(auth)
 
 }

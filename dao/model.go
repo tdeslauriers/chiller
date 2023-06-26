@@ -80,21 +80,20 @@ type Phone struct {
 
 // gallery persistence objects
 type Image struct {
-	Id           int64         `json:"id"`
-	Filename     string        `json:"filename"`
-	Title        string        `json:"title"`
-	Description  string        `json:"description"`
-	Date         string        `json:"date"`
-	Published    bool          `json:"published"`
-	Thumbnail    []byte        `json:"thumbnail"`
-	Presentation []byte        `json:"presentation"`
-	Image        []byte        `json:"image"`
-	AlbumImages  []AlbumImages `json:"albumImages"`
+	Id          int64  `json:"id" db:"id"`
+	Filename    string `json:"filename" db:"filename"`
+	Title       string `json:"title" db:"title"`
+	Description string `json:"description" db:"description"`
+	Date        string `json:"date" db:"date"`
+	Published   bool   `json:"published" db:"published"`
+	// Thumbnail    []byte `json:"thumbnail" db:"thumbnail"`
+	// Presentation []byte `json:"presentation" db:"presentation"`
+	// Image        []byte `json:"image" db:"image"`
 }
 
 type Album struct {
-	Id    int64  `json:"id"`
-	Album string `json:"album"`
+	Id    int64  `json:"id" db:"id"`
+	Album string `json:"album" db:"album"`
 }
 
 type AlbumImages struct {
@@ -104,9 +103,9 @@ type AlbumImages struct {
 }
 
 type AiXref struct {
-	Id       int64
-	Album_id int64
-	Image_id int64
+	Id       int64 `json:"id" db:"id"`
+	Album_id int64 `json:"album_id" db:"album_id"`
+	Image_id int64 `json:"image_id" db:"image_id"`
 }
 
 // allowance persistence objects

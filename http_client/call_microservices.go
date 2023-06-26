@@ -216,7 +216,13 @@ func PostRecord(endpoint string, t Bearer, v interface{}) error {
 		if err != nil {
 			log.Fatalf("Error reading error response from call: %v", err)
 		}
-		log.Printf("Error in post request of %v: %s", v, string(body))
+		var jsonPayload string
+		if len(string(vToBytes)) > 300 {
+			jsonPayload = string(vToBytes)[:300]
+		} else {
+			jsonPayload = string(vToBytes)
+		}
+		log.Printf("Error in post request of %v: %s", jsonPayload, string(body))
 	}
 
 	return nil

@@ -23,9 +23,10 @@ func InsertImage(image Image) (err error) {
 		image.Description,
 		image.Date,
 		image.Published,
-		image.Thumbnail,
-		image.Presentation,
-		image.Image)
+		// image.Thumbnail,
+		// image.Presentation,
+		// image.Image
+	)
 	if err != nil {
 		return err
 	}

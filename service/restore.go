@@ -60,3 +60,56 @@ func RestoreAuthService(t http_client.Bearer) error {
 
 	return nil
 }
+
+func RestoreAllowanceService(t http_client.Bearer) error {
+
+	var (
+		allowances         []dao.Allowance
+		tasktypes          []dao.Tasktype
+		tasks              []dao.Task
+		tasktypeAllowances []dao.TasktypeAllowance
+		taskAllowances     []dao.TaskAllowance
+	)
+
+	if err := restoreAppTable(http_client.Restore_allowance_url, dao.BACKUP_ALLOWANCE, "allowance", t, &allowances); err != nil {
+		return err
+	}
+	if err := restoreAppTable(http_client.Restore_allowance_url, dao.BACKUP_ALLOWANCE, "tasktype", t, &tasktypes); err != nil {
+		return err
+	}
+	if err := restoreAppTable(http_client.Restore_allowance_url, dao.BACKUP_ALLOWANCE, "task", t, &tasks); err != nil {
+		return err
+	}
+	if err := restoreAppTable(http_client.Restore_allowance_url, dao.BACKUP_ALLOWANCE, "tasktype_allowance", t, &tasktypeAllowances); err != nil {
+		return err
+	}
+	if err := restoreAppTable(http_client.Restore_allowance_url, dao.BACKUP_ALLOWANCE, "task_allowance", t, &taskAllowances); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func RestoreGalleryService(t http_client.Bearer) error {
+
+	var (
+		albums []dao.Album
+		images []dao.Image
+		// albumImages []dao.AiXref
+	)
+
+	url := http_client.Restore_gallery_url
+	db := dao.GALLERY_BACKUP_DB
+
+	if err := restoreAppTable(url, db, "album", t, &albums); err != nil {
+		return err
+	}
+	if err := restoreAppTable(url, db, "image", t, &images); err != nil {
+		return err
+	}
+	// if err := restoreAppTable(url, db, "album_image", t, &albumImages); err != nil {
+	// 	return err
+	// }
+
+	return nil
+}
